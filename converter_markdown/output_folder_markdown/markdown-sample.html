@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Converted Markdown</title>
   </head>
   <body>
@@ -13,16 +13,17 @@
       <li>that one</li>
       <li>the other one</li>
     </ul>
-    <p>Note that --- not considering the asterisk --- the actual text content starts at 4-columns in.</p>
+    <p>
+      Note that --- not considering the asterisk --- the actual text content starts at 4-columns in.
+    </p>
     <blockquote>
-      <p>Block quotes are
-      written like so.</p>
-      <p>They can span multiple paragraphs,
-      if you like.</p>
+      <p>Block quotes are written like so.</p>
+      <p>They can span multiple paragraphs, if you like.</p>
     </blockquote>
-    <p>Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., "it's all in chapters 12--14"). Three dots ... will be converted to an ellipsis.
-    Unicode is supported. ☺</p>
-
+    <p>
+      Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., "it's all in chapters 12--14"). Three dots ... will be converted to an ellipsis.
+      Unicode is supported. ☺
+    </p>
     <h2>An h2 header</h2>
     <p>Here's a numbered list:</p>
     <ol>
@@ -30,19 +31,18 @@
       <li>second item</li>
       <li>third item</li>
     </ol>
-    <p>Note again how the actual text starts at 4 columns in (4 characters
-    from the left side). Here's a code sample:</p>
+    <p>Note again how the actual text starts at 4 columns in (4 characters from the left side). Here's a code sample:</p>
     <pre><code># Let me re-iterate ...
 for i in 1 .. 10 { do-something(i) }
-    </code></pre>
-    <p>As you probably guessed, indented 4 spaces. By the way, instead of
-    indenting the block, you can use delimited blocks, if you like:</p>
+</code></pre>
+    <p>
+      As you probably guessed, indented 4 spaces. By the way, instead of indenting the block, you can use delimited blocks, if you like:
+    </p>
     <pre><code>define foobar() {
     print "Welcome to flavor country!";
 }
 </code></pre>
-    <p>(which makes copying &amp; pasting easier). You can optionally mark the
-    delimited block for Pandoc to syntax highlight it:</p>
+    <p>(which makes copying &amp; pasting easier). You can optionally mark the delimited block for Pandoc to syntax highlight it:</p>
     <pre><code class="language-python">import time
 # Quick, count to ten!
 for i in range(10):
@@ -50,7 +50,6 @@ for i in range(10):
     time.sleep(0.5)
     print i
 </code></pre>
-
     <h3>An h3 header</h3>
     <p>Now a nested list:</p>
     <ol>
@@ -64,8 +63,7 @@ for i in range(10):
       </li>
       <li>Boil some water.</li>
       <li>
-        Dump everything in the pot and follow
-        this algorithm:
+        Dump everything in the pot and follow this algorithm:
         <pre><code>find wooden spoon
 uncover pot
 stir
@@ -77,22 +75,24 @@ goto first step (or shut off burner when done)
         <p>Do not bump wooden spoon or it will fall.</p>
       </li>
     </ol>
-    <p>Notice again how text always lines up on 4-space indents (including
-that last line which continues item 3 above).</p>
-    <p>Here's a link to <a href="http://foo.bar">a website</a>, to a <a href="local-doc.html">local
-    doc</a>, and to a <a href="#an-h2-header">section heading in the current
-    doc</a>. Here's a footnote <sup id="fnref:1"><a href="#fn:1" title="Footnote">1</a></sup>.</p>
-    <hr />
+    <p>
+      Notice again how text always lines up on 4-space indents (including that last line which continues item 3 above).
+    </p>
+    <p>
+      Here's a link to <a href="http://foo.bar">a website</a>, to a <a href="local-doc.html">local
+      doc</a>, and to a <a href="#an-h2-header">section heading in the current
+      doc</a>. Here's a footnote <sup id="fnref1"><a href="#fn1">1</a></sup>.
+    </p>
     <div class="footnotes">
+      <hr />
       <ol>
-        <li id="fn:1">
-          Footnote text goes here. <a href="#fnref:1" title="Return to content">↩</a>
+        <li id="fn1">
+          Footnote text goes here. <a href="#fnref1">&#8617;</a>
         </li>
       </ol>
     </div>
-
     <p>Tables can look like this:</p>
-    <table border="1">
+    <table>
       <caption>Shoes, their sizes, and what they're made of</caption>
       <thead>
         <tr>
@@ -119,10 +119,8 @@ that last line which continues item 3 above).</p>
         </tr>
       </tbody>
     </table>
-    <p>Table: Shoes, their sizes, and what they're made of</p>
-    <p>(The above is the caption for the table.) Pandoc also supports
-    multi-line tables:</p>
-    <table border="1">
+    <p>Pandoc also supports multi-line tables:</p>
+    <table>
       <thead>
         <tr>
           <th>keyword</th>
@@ -132,17 +130,20 @@ that last line which continues item 3 above).</p>
       <tbody>
         <tr>
           <td>red</td>
-          <td>Sunsets, apples, and other red or reddish things.</td>
+          <td>Sunsets, apples, and<br />
+other red or reddish<br />
+things.</td>
         </tr>
         <tr>
           <td>green</td>
-          <td>Leaves, grass, frogs and other things it's not easy being.</td>
+          <td>Leaves, grass, frogs<br />
+and other things it's<br />
+not easy being.</td>
         </tr>
       </tbody>
     </table>
-
+    <p>A horizontal rule follows.</p>
     <hr />
-
     <p>Here's a definition list:</p>
     <dl>
       <dt>apples</dt>
@@ -152,8 +153,7 @@ that last line which continues item 3 above).</p>
       <dt>tomatoes</dt>
       <dd>There's no "e" in tomatoe.</dd>
     </dl>
-    <p>Again, text is indented 4 spaces. (Put a blank line between each
-    term/definition pair to spread things out more.)</p>
+    <p>Again, text is indented 4 spaces. (Put a blank line between each term/definition pair to spread things out more.)</p>
     <p>Here's a "line block":</p>
     <p>
       Line one<br />
@@ -161,13 +161,20 @@ that last line which continues item 3 above).</p>
       Line tree
     </p>
     <p>and images can be specified like so:</p>
-    <p><img src="example-image.jpg" alt="example image" title="An exemplary image" /></p>
-    <p>Inline math equations go in like so: <span class="math inline">\( \omega = d\phi / dt \)</span>. Display
-    math should get its own line and be put in in double-dollarsigns:</p>
+    <p>
+      <img src="example-image.jpg" alt="example image" title="An exemplary image" />
+    </p>
+    <p>
+      Inline math equations go in like so: <span class="math inline">\( \omega = d\phi / dt \)</span>.
+    </p>
+    <p>
+      Display math should get its own line and be put in in double-dollarsigns:
+    </p>
     <div class="math display">
-      \[ I = \int \rho R^{2} dV \]
+      \[I = \int \rho R^{2} dV\]
     </div>
-    <p>And note that you can backslash-escape any punctuation characters
-    which you wish to be displayed literally, ex.: <code>foo</code>, *bar*, etc.</p>
+    <p>
+      And note that you can backslash-escape any punctuation characters which you wish to be displayed literally, ex.: `foo`, *bar*, etc.
+    </p>
   </body>
 </html>
