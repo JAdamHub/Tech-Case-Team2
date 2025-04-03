@@ -23,115 +23,6 @@ body {
   padding: 0 1rem;
 }
 
-/* Dashboard Layout */
-.dashboard {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.dashboard-card {
-  background: var(--light-bg);
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.dashboard-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-}
-
-.dashboard-card h3 {
-  margin-top: 0;
-  border-bottom: 2px solid var(--primary-color);
-  padding-bottom: 0.5rem;
-  color: var(--primary-color);
-}
-
-.dashboard-card ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.dashboard-card li {
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px dashed #ddd;
-}
-
-.dashboard-card li:last-child {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.dashboard-card small {
-  display: block;
-  font-size: 0.8rem;
-  color: #777;
-}
-
-/* Recent Changes List */
-.recent-changes {
-  margin: 2rem 0;
-  padding: 0;
-  list-style: none;
-}
-
-.recent-changes li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  background: var(--light-bg);
-  border-radius: 6px;
-  transition: background-color 0.2s;
-}
-
-.recent-changes li:hover {
-  background-color: #eaeaea;
-}
-
-.change-type {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: bold;
-  text-transform: uppercase;
-  min-width: 90px;
-  text-align: center;
-}
-
-.change-type-linting {
-  background-color: var(--info);
-  color: var(--light-text);
-}
-
-.change-type-test-generation {
-  background-color: var(--success);
-  color: var(--light-text);
-}
-
-.change-type-bug-fix {
-  background-color: var(--danger);
-  color: var(--light-text);
-}
-
-.change-type-code-review {
-  background-color: var(--warning);
-  color: var(--dark-bg);
-}
-
-.change-date {
-  font-size: 0.85rem;
-  color: #777;
-}
-
 /* Buttons & Links */
 .button {
   display: inline-block;
@@ -166,18 +57,10 @@ a:hover {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .recent-changes li {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .change-date {
-    margin-top: 0.5rem;
-  }
-  
-  .change-type {
-    margin-bottom: 0.5rem;
-  }
+  /* Fjern eller juster disse hvis de kun var for .recent-changes */
+  /* .recent-changes li { ... } */
+  /* .change-date { ... } */
+  /* .change-type { ... } */
 }
 
 /* Code blocks and diff styling */
