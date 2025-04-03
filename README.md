@@ -1,33 +1,126 @@
-# Tech case for AAU Case Competition
+# LLM Code Automation Hub 🤖✨
 
-https://jadamhub.github.io/Tech-Case-Team2/
+![GitHub Actions Workflow Status](https://github.com/Tech-Case-Team2/workflows/LLM%20Automation%20and%20Reporting/badge.svg)
 
-## Context
+## 🌟 Project Overview
 
-In today’s fast-paced software industry, companies like Vestas face increasing pressure to innovate while maintaining efficient development processes. Software engineers are responsible for a wide range of tasks—from fixing bugs and writing new features to reviewing code and ensuring best practices. This leaves limited time for creative problem-solving, as much of their effort is spent on repetitive or administrative tasks.
+This project leverages the power of Large Language Models (LLMs) to automate common software development tasks, reduce repetitive work, and increase developer productivity. Using a combination of GitHub Actions, Flask, and OpenAI's API, we've built a comprehensive system that can analyze code changes, suggest improvements, generate tests, and create meaningful reports.
 
-## Challenge
+## 🧩 Key Components
 
-Your challenge is to explore how large language models (LLMs), like those available through platforms such as Azure OpenAI, can bridge these gaps and address inefficiencies Copilot doesn’t currently handle. Think critically about where bottlenecks occur in your workflow and what manual tasks could be automated to improve overall efficiency.
+### 1. Automated Code Analysis Pipeline 🔍
 
-## Tasks
+Our system automatically analyzes code changes in the repository:
 
-These tasks are intended to inspire you and provide ideas for your projects. You can choose to work on any of them, or come up with your own unique solutions. The goal is to be creative and think outside the box, focusing on developing tools that reduce daily repetitive and administrative tasks.
+- **Code Review** - LLM reviews code and provides constructive feedback
+- **Bug Detection** - Identifies common programming issues and suggests fixes
+- **Linting Automation** - Finds and resolves style and best practice violations
+- **Test Generation** - Automatically creates test cases for code functions
 
-1. **Automating Pull Requests**: Implement a solution that uses LLMs to automatically generate pull requests for bug fixes or new features. This includes generating detailed descriptions based on the changes made.
-2. **Bug Fix Suggestions**: Develop a system where LLMs analyze code changes and suggest potential bug fixes. This could involve identifying common coding errors and proposing corrections.
-3. **Code Review Automation**: Create a tool that uses LLMs to assist in code reviews by automatically adding suggestions and comments to the code where improvements can be made. This includes enforcing consistent quality and style across the codebase.
-4. **Automating Administrative Tasks**: Implement automation for detecting linter issues and ensuring they are fixed before the review process. This task involves integrating LLMs to identify and resolve common linter errors.
-5. **Addressing Workflow Bottlenecks**: Explore how LLMs can help automate manual testing. This task focuses on identifying and mitigating workflow bottlenecks beyond just coding.
+### 2. Report Generation System 📊
 
-## Getting Started
+Every analysis creates markdown reports that are published to GitHub Pages:
 
-1. **Fork the Repository**: Begin by forking this repository to your own GitHub account.
-2. **Set Up GitHub Actions**: Follow the instructions provided in the `.github/workflows` directory to configure GitHub Actions for automated testing and deployment.
-3. **Implement Your Solutions**: Modify the files in the `src/` directory to develop and implement your solutions for the tasks.
+- Individual file reports with detailed findings
+- Change history tracking
+- Beautiful web interface to browse all code changes
 
-### Notes:
+### 3. Pull Request Automation 🔄
 
-- **Flexibility in Coding Languages**: Feel free to use any programming language that you are comfortable with. The files in the `src/` directory are provided as ideas for your projects and can be adapted to suit your needs.
-- **Customizing GitHub Actions**: You are welcome to modify the GitHub Actions workflow file to better fit your project requirements. The provided configuration is just a starting point.
-- **Example Code**: The `src/example_code.py` file contains sample functions with intentional bugs and linter errors. Use this code as an idea for your projects to test and validate your solutions, ensuring they can effectively identify and address these issues.
+Streamlines the PR process:
+
+- Automatically identifies changed files
+- Generates meaningful PR descriptions based on code changes
+- Creates pull requests with proper metadata
+
+### 4. Content Upload System 📤
+
+A Flask-based server that allows:
+
+- Drag-and-drop file uploads
+- Markdown file processing
+- Integration with the reporting system
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.10+
+- OpenAI API key
+- GitHub repository with Actions enabled
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/YourUsername/Tech-Case-Team2.git
+   cd Tech-Case-Team2
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Set up environment variables:
+   ```bash
+   # Create a .env file with your OpenAI API key
+   echo "OPENAI_API_KEY=your-api-key-here" > .env
+   ```
+
+4. Run the server:
+   ```bash
+   python src/upload_server.py
+   ```
+
+## 🔄 Workflow
+
+The system follows this process:
+
+1. 📝 When code is pushed to the repository, GitHub Actions workflow is triggered
+2. 🔍 The workflow identifies changed files in the codebase
+3. 🧠 LLM analyzes the code changes for issues and improvement opportunities
+4. ✅ Tests are generated for new or modified functions
+5. 📊 Report files are created in the `_llm_changes` directory
+6. 🌐 GitHub Pages is updated with the latest analysis
+7. 🔄 A pull request may be automatically created with LLM-generated description
+
+## 💻 Usage Examples
+
+### Viewing Code Change Reports
+
+Visit the GitHub Pages site at: [https://yourteam.github.io/Tech-Case-Team2/](https://yourteam.github.io/Tech-Case-Team2/)
+
+### Uploading Your Own Files
+
+Access the upload page at: [https://yourteam.github.io/Tech-Case-Team2/drag-drop](https://yourteam.github.io/Tech-Case-Team2/drag-drop)
+
+## 🏗️ Architecture
+
+```
+├── .github/workflows     # GitHub Actions configuration
+├── _layouts              # Jekyll templates for GitHub Pages
+├── _llm_changes          # Generated LLM analysis reports
+├── src                   # Core Python source code
+│   ├── combined_flow.py  # Main analysis pipeline
+│   ├── upload_server.py  # Flask server for uploads
+│   └── automate_pull_requests.py  # PR automation
+├── tests                 # Generated and manual tests
+└── assets                # Web assets for the UI
+```
+
+## 🔧 Customization
+
+You can customize the analysis pipeline by modifying:
+
+- The LLM prompt templates in `combined_flow.py`
+- The GitHub Actions workflow in `.github/workflows/main.yml`
+- The web interface templates in `_layouts/`
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👥 Contributors
+
+- Team 2 - AAU Case Competition
