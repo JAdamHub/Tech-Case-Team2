@@ -5,34 +5,20 @@ from dotenv import load_dotenv
 from github import Github
 import subprocess
 
-def get_pr_files():
-    """Get files changed in a pull request"""
+def get_modified_python_files():
+    """Get a list of modified Python files using git"""
     try:
-        load_dotenv()
-        github_token = os.getenv("GITHUB_TOKEN")
-        if not github_token:
-            print("GITHUB_TOKEN environment variable not set.")
-            return []
-        
-        # Get repository and PR information from environment variables
-        repo_name = os.getenv("GITHUB_REPOSITORY")
-        pr_number = os.getenv("PR_NUMBER")
-        
-        if not repo_name or not pr_number:
-            print("Required environment variables not set.")
-            # Fallback to local git changes for demonstration
-            return get_locally_modified_files()
-        
-        g = Github(github_token)
-        repo = g.get_repo(repo_name)
-        pr = repo.get_pull(int(pr_number))
-        
-        return [(file.filename, file.patch) for file in pr.get_files()]
-    
+        result = subprocess.run(
+            ['git', 'diff', '--name-only', 'HEAD'], 
+            capture_output=True, 
+            text=True
+        )
+        files = result.stdout.strip().split('\n')
+        return [f for f in files if f.endswith('.py')]
     except Exception as e:
-        print(f"Error getting PR files: {e}")
+        print(f"Error getting modified files: {e}")
         return []
-        
+    
 def get_locally_modified_files():
     """Get locally modified files for demonstration purposes"""
     try:
@@ -91,13 +77,23 @@ def review_code_with_ai(file_path, content):
         
         # Create a prompt based on file type
         prompt = f"""
-        Please review the following code from {file_path} and provide constructive feedback.
+        Please review the following code and provide constructive feedback.
         Focus on:
         1. Code quality and best practices
         2. Potential bugs or edge cases
         3. Performance issues
         4. Security concerns
         5. Style and consistency
+        
+        Make sure that in the review add comments on each line of code. 
+        For example:
+        
+            input:
+            x+1=x
+        
+            output:
+            # x is not defined
+            x+1=x
         
         For each issue, provide:
         - The line number or code section
@@ -116,8 +112,7 @@ def review_code_with_ai(file_path, content):
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that reviews code and provides constructive feedback."},
                 {"role": "user", "content": prompt}
-            ],
-            max_completion_tokens=1536
+            ]
         )
         
         return response.choices[0].message.content
@@ -165,7 +160,7 @@ def automate_code_review():
     print('Automating code review process...')
     
     # Get files to review
-    files = get_pr_files()
+    files = get_modified_python_files()
     
     if not files:
         print("No files to review.")
