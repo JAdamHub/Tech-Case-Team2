@@ -2,15 +2,22 @@ from flask import Flask, request, jsonify, send_from_directory
 import os
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__, static_folder='.')
+app = Flask(__name__)
 
 # Configure upload folder
 UPLOAD_FOLDER = 'converter_markdown/input_folder'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Configure static folder for layouts
+LAYOUTS_FOLDER = '_layouts'
+
 @app.route('/')
 def index():
-    return send_from_directory('.', 'drag_drop_upload.html')
+    return send_from_directory(LAYOUTS_FOLDER, 'default.html')
+
+@app.route('/drag_drop_upload.html')
+def upload_page():
+    return send_from_directory(LAYOUTS_FOLDER, 'drag_drop_upload.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():

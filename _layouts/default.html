@@ -10,6 +10,27 @@
       <link rel="stylesheet" href="{{ css_file | relative_url }}">
     {% endfor %}
   {% endif %}
+  <style>
+    /* Add styles for the upload button */
+    .upload-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      text-decoration: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: background-color 0.3s ease;
+    }
+    .upload-button:hover {
+      background-color: #1976d2;
+    }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -29,6 +50,8 @@
   </header>
   
   <main class="site-content">
+    <!-- Add the upload button -->
+    <a href="/drag_drop_upload.html" class="upload-button">Upload Documents</a>
     {{ content }}
   </main>
   
