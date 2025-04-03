@@ -546,6 +546,109 @@ def run_tests(test_path):
 
 # ===== Combined Report Generation =====
 
+def generate_individual_report(file_result):
+    """Generate an individual report for a single file in Markdown format"""
+    timestamp = datetime.now()
+    file_path = file_result['file_path']
+    file_name = os.path.basename(file_path)
+    report_filename = f"{timestamp.strftime('%Y%m%d_%H%M%S')}_{file_name}_report.md"
+    report_path = os.path.join(LLM_CHANGES_DIR, report_filename)
+    
+    # Create the directory if it doesn't exist
+    if not os.path.exists(LLM_CHANGES_DIR):
+        os.makedirs(LLM_CHANGES_DIR)
+        print(f"Created directory: {LLM_CHANGES_DIR}")
+    
+    # Extract title from filename
+    report_title = f"Analysis Report for {file_name}"
+    
+    # Jekyll Front Matter
+    front_matter = f"""---
+layout: llm_change
+title: "{report_title}"
+date: {timestamp.isoformat()}
+change_type: "Individual Analysis"
+consolidated: false
+file_name: "{file_name}"
+---
+"""
+    
+    # Report header
+    report_content = f"""# {report_title}
+Generated on: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}
+
+This report contains code review, bug fix suggestions, linting fixes, and test generation for {file_path}.
+
+"""
+    
+    # Add detailed results for the file
+    report_content += f"\n## File: {file_path}\n\n"
+    
+    # Code Review section
+    if file_result.get('code_review'):
+        report_content += "### Code Review\n\n"
+        report_content += "```python\n"
+        report_content += file_result['code_review']
+        report_content += "\n```\n\n"
+    
+    # Bug Fixes section
+    if file_result.get('bugs'):
+        report_content += "### Bug Fix Suggestions\n\n"
+        for i, bug in enumerate(file_result['bugs'], 1):
+            report_content += f"#### Issue {i}: {bug['type']}\n"
+            if 'line' in bug:
+                report_content += f"- Line: {bug['line']}\n"
+            if 'suggestion' in bug:
+                report_content += f"- Suggestion: {bug['suggestion']}\n"
+            if 'imports' in bug:
+                report_content += f"- Unused imports: {', '.join(bug['imports'])}\n"
+            report_content += "\n"
+        
+        if file_result.get('bug_suggestions'):
+            report_content += "#### AI-Generated Fix Suggestions\n\n"
+            report_content += "```\n"
+            report_content += file_result['bug_suggestions']
+            report_content += "\n```\n\n"
+    
+    # Linting Issues section
+    if file_result.get('linting_issues'):
+        report_content += "### Linting Issues\n\n"
+        for issue in file_result['linting_issues']:
+            report_content += f"- Line {issue['line']}: {issue['message']} ({issue['symbol']})\n"
+        report_content += "\n"
+        
+        if file_result.get('linting_diff'):
+            report_content += "#### Linting Fixes\n\n"
+            report_content += "```diff\n"
+            report_content += file_result['linting_diff']
+            report_content += "\n```\n\n"
+    
+    # Test Generation section
+    if file_result.get('test_file'):
+        report_content += "### Generated Tests\n\n"
+        report_content += f"Test file created: `{file_result['test_file']}`\n\n"
+        
+        if file_result.get('test_content'):
+            report_content += "```python\n"
+            report_content += file_result['test_content']
+            report_content += "\n```\n\n"
+        
+        if file_result.get('test_results'):
+            report_content += "#### Test Results\n\n"
+            report_content += "```\n"
+            report_content += file_result['test_results']
+            report_content += "\n```\n\n"
+
+    # Write the report to file
+    try:
+        with open(report_path, 'w') as f:
+            f.write(front_matter + report_content)
+        print(f"Individual report saved to: {report_path}")
+        return report_path
+    except Exception as e:
+        print(f"Error saving individual report: {e}")
+        return None
+
 def generate_combined_report(file_results):
     """Generate a combined report in Markdown format"""
     timestamp = datetime.now()
@@ -669,8 +772,9 @@ def combined_flow():
         print("No files specified for processing.")
         return
     
-    # Results container for the combined report
+    # Results container for the individual reports
     file_results = []
+    report_paths = []
     
     for file_path in files_to_process:
         print(f"\n=== Processing {file_path} ===")
@@ -741,17 +845,24 @@ def combined_flow():
                     #     test_results = run_tests(saved_test_path)
                     #     file_result['test_results'] = test_results
         
-        # Add the file result to the collection
+        # Generate individual report for this file
+        report_path = generate_individual_report(file_result)
+        if report_path:
+            report_paths.append(report_path)
+            
+        # Add the file result to the collection (in case we still want to generate a combined report later)
         file_results.append(file_result)
     
-    # Generate the combined report
-    report_path = generate_combined_report(file_results)
+    # No longer generating combined report by default
+    # report_path = generate_combined_report(file_results)
     
-    if report_path:
-        print(f"\n=== Combined Analysis Complete ===")
-        print(f"Combined report saved to: {report_path}")
+    if report_paths:
+        print(f"\n=== Individual Analysis Complete ===")
+        print(f"Generated {len(report_paths)} individual reports:")
+        for path in report_paths:
+            print(f"- {path}")
     else:
-        print("\n=== Combined Analysis Failed ===")
+        print("\n=== Analysis Failed ===")
 
 if __name__ == '__main__':
     combined_flow()
