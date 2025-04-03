@@ -1,3 +1,13 @@
+---
+layout: llm_change
+title: "Generated Tests for buggy copy.py"
+date: 2025-04-03T13:56:36.625472
+file: "tests/evaluate/test_buggy copy.py"
+change_type: "Test Generation"
+source_file: "evaluate/buggy copy.py"
+consolidated: true
+---
+```python
 import pytest
 
 from evaluate.buggy_copy import (
@@ -71,3 +81,4 @@ def test_concatenate_strings():
 def test_list_index_error():
     # The function is expected to return the first element of the hard-coded list [1, 2, 3]
     assert list_index_error() == 1
+```
