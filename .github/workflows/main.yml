@@ -14,7 +14,7 @@ jobs:
 
   llm_tasks_and_report:
     runs-on: ubuntu-latest
-    permissions: # Required for Jekyll deploy action
+    permissions: # Required for Jekyll deploy action and repository write access
        contents: write
        pages: write
        id-token: write
@@ -55,8 +55,9 @@ jobs:
       # --- Commit potential changes made by scripts (lint fixes, generated tests) ---
       - name: Commit LLM Changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          # Configure Git with GitHub Actions token for authentication
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions"
           
           # Debug: List what was generated
           echo "Checking for generated files:"
@@ -81,12 +82,32 @@ jobs:
           if git diff --staged --quiet; then
             echo "No LLM changes to commit."
           else
-            git commit -m "chore: Apply LLM fixes and generated tests/reports"
-            # Force push to ensure changes are applied
-            git push origin HEAD:${{ github.head_ref || github.ref_name }} || echo "Push failed, maybe no changes or protected branch."
+            git commit -m "chore: Apply LLM fixes and generated tests/reports [skip ci]"
+            
+            # Determine the correct branch reference based on event type
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              # For pull requests, we need to push to the head ref of the PR
+              echo "Pushing changes to PR branch: ${{ github.head_ref }}"
+              git push origin HEAD:${{ github.head_ref }} || {
+                echo "Error: Failed to push changes to PR branch"
+                echo "PR head ref: ${{ github.head_ref }}"
+                echo "This may be due to branch protection rules"
+                exit 1
+              }
+            else
+              # For push events, we push to the current branch
+              echo "Pushing changes to branch: ${{ github.ref_name }}"
+              git push origin HEAD:${{ github.ref_name }} || {
+                echo "Error: Failed to push changes to repository"
+                echo "Current branch: $(git branch --show-current)"
+                echo "GitHub ref: ${{ github.ref_name }}"
+                echo "This may be due to branch protection rules"
+                exit 1
+              }
+            fi
           fi
         # Continue even if commit/push fails (e.g., no changes, protected branch)
-        continue-on-error: true
+        continue-on-error: ${{ github.event_name == 'pull_request' }}  # Only allow errors to be ignored for PRs, not for pushes
 
       # --- Setup and Build Jekyll Site ---
       - name: Setup Ruby and Jekyll
@@ -104,6 +125,13 @@ jobs:
         run: JEKYLL_ENV=production bundle exec jekyll build --baseurl ${{ steps.pages.outputs.base_path }}
         env:
            JEKYLL_BASEURL: ${{ steps.pages.outputs.base_path }}
+
+      - name: Verify Jekyll Build
+        run: |
+          echo "Checking for _llm_changes content in build:"
+          ls -la _site/ || echo "No _site directory found!"
+          echo "Checking for changes directory in Jekyll build:"
+          ls -la _site/changes/ || echo "Changes directory not found in _site!"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -14,4 +14,10 @@ plugins:
 collections:
   llm_changes:
     output: true
-    permalink: /changes/:path/ 
+    permalink: /changes/:path/
+    sort_by: date
+    sort_direction: reverse
+    
+# Ensure _llm_changes directory is included in the build
+include:
+  - _llm_changes 
