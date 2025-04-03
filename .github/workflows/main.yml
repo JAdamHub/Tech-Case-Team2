@@ -2,6 +2,12 @@ name: LLM Automation and Reporting
 
 on: [push, pull_request]
 
+# Global permissions for all jobs
+permissions:
+  contents: write  # Needed for pushing changes
+  pages: write     # Needed for GitHub Pages
+  id-token: write  # Needed for GitHub Pages
+
 # Environment variables for Python scripts
 env:
   PYTHONUNBUFFERED: "1"
@@ -14,10 +20,6 @@ jobs:
 
   llm_tasks_and_report:
     runs-on: ubuntu-latest
-    permissions: # Required for Jekyll deploy action and repository write access
-       contents: write
-       pages: write
-       id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -55,9 +57,9 @@ jobs:
       # --- Commit potential changes made by scripts (lint fixes, generated tests) ---
       - name: Commit LLM Changes
         run: |
-          # Configure Git with GitHub Actions token for authentication
+          # Configure Git with GitHub Actions user
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "GitHub Actions"
+          git config --local user.name "github-actions[bot]"
           
           # Debug: List what was generated
           echo "Checking for generated files:"
@@ -69,7 +71,7 @@ jobs:
           # Touch a file to ensure the directory is not empty
           echo "LLM Changes from GitHub Action run at $(date)" > _llm_changes/action_run_marker.md
           
-          # Add generated reports and any modified/created files (tests, fixed source)
+          # Add generated reports and any modified/created files
           git add -f _llm_changes/
           git add tests/
           git add src/
@@ -78,34 +80,15 @@ jobs:
           echo "Git status:"
           git status
           
-          # Check if there are changes to commit
-          if git diff --staged --quiet; then
-            echo "No LLM changes to commit."
-          else
-            git commit -m "chore: Apply LLM fixes and generated tests/reports [skip ci]"
-            
-            # Determine the correct branch reference based on event type
-            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              # For pull requests, we need to push to the head ref of the PR
-              echo "Pushing changes to PR branch: ${{ github.head_ref }}"
-              git push origin HEAD:${{ github.head_ref }} || {
-                echo "Error: Failed to push changes to PR branch"
-                echo "PR head ref: ${{ github.head_ref }}"
-                echo "This may be due to branch protection rules"
-                exit 1
-              }
-            else
-              # For push events, we push to the current branch
-              echo "Pushing changes to branch: ${{ github.ref_name }}"
-              git push origin HEAD:${{ github.ref_name }} || {
-                echo "Error: Failed to push changes to repository"
-                echo "Current branch: $(git branch --show-current)"
-                echo "GitHub ref: ${{ github.ref_name }}"
-                echo "This may be due to branch protection rules"
-                exit 1
-              }
-            fi
-          fi
+          # Commit and push if there are changes
+          git diff --quiet && git diff --staged --quiet || (
+            git commit -m "chore: Apply LLM fixes and generated tests/reports [skip ci]
+
+            - Generated test files for source code
+            - Created LLM change reports
+            - Fixed linting issues in code" && 
+            git push
+          )
         # Continue even if commit/push fails (e.g., no changes, protected branch)
         continue-on-error: ${{ github.event_name == 'pull_request' }}  # Only allow errors to be ignored for PRs, not for pushes
 
