@@ -112,7 +112,7 @@ def get_ai_suggestions(file_content, bugs):
                 {"role": "system", "content": "You are a helpful assistant that analyzes Python code and suggests bug fixes."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=1024,
+            max_completion_tokens=1024,
             temperature=0.2,
             top_p=0.95,
         )

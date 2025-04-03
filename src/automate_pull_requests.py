@@ -44,7 +44,7 @@ def generate_pr_description(diff):
                 {"role": "system", "content": "You are a helpful assistant that writes detailed pull request descriptions."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=1024,
+            max_completion_tokens=1024,
             temperature=0.7,  # Slightly higher temperature for creative PR descriptions
             top_p=0.95,
         )

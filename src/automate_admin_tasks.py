@@ -123,7 +123,7 @@ def fix_linting_issues_with_ai(file_path, issues):
                 {"role": "system", "content": "You are a helpful assistant that fixes Python code linting issues."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=2048,
+            max_completion_tokens=2048,
             temperature=0.2,
             top_p=0.95,
         )

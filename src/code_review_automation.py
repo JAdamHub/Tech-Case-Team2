@@ -117,7 +117,7 @@ def review_code_with_ai(file_path, content):
                 {"role": "system", "content": "You are a helpful assistant that reviews code and provides constructive feedback."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=1536,
+            max_completion_tokens=1536,
             temperature=0.2,
             top_p=0.95,
         )
