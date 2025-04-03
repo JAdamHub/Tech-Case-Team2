@@ -93,20 +93,6 @@ Visit the GitHub Pages site at: [https://JAdamhub.github.io/Tech-Case-Team2/](ht
 
 Access the upload page at: [https://JAdamhub.github.io/Tech-Case-Team2/drag-drop](https://JAdamhub.github.io/Tech-Case-Team2/drag-drop)
 
-## 🏗️ Architecture
-
-```
-├── .github/workflows     # GitHub Actions configuration
-├── _layouts              # Jekyll templates for GitHub Pages
-├── _llm_changes          # Generated LLM analysis reports
-├── src                   # Core Python source code
-│   ├── combined_flow.py  # Main analysis pipeline
-│   ├── upload_server.py  # Flask server for uploads
-│   └── automate_pull_requests.py  # PR automation
-├── tests                 # Generated and manual tests
-└── assets                # Web assets for the UI
-```
-
 ## 🔧 Customization
 
 You can customize the analysis pipeline by modifying:
