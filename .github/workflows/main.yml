@@ -1,0 +1,120 @@
+name: LLM Automation and Reporting
+
+on: [push, pull_request]
+
+# Environment variables for Python scripts
+env:
+  PYTHONUNBUFFERED: "1"
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} # setting OpenAI Api key
+  GITHUB_REPOSITORY: ${{ github.repository }}
+  PR_NUMBER: ${{ github.event.pull_request.number }} # For PR context
+
+jobs:
+  # Removed individual jobs for each script as they are now part of a sequence
+
+  llm_tasks_and_report:
+    runs-on: ubuntu-latest
+    permissions: # Required for Jekyll deploy action
+       contents: write
+       pages: write
+       id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+            persist-credentials: false # Recommended for deploy actions
+            fetch-depth: 0 # Fetch all history for git diff
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10' # Specify a version
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # --- Run LLM Tasks that Modify Code/Generate Reports ---
+      - name: Run Bug Fix Suggestions (Analysis Only)
+        run: python src/bug_fix_suggestions.py
+
+      - name: Run Admin Tasks Automation (Linting Fixes & Report)
+        id: admin_tasks
+        run: python src/automate_admin_tasks.py
+
+      - name: Run Workflow Bottleneck Mitigation (Test Generation & Report)
+        id: bottlenecks
+        run: python src/address_workflow_bottlenecks.py
+        
+      # Optional: Add Code Review Automation if needed here
+      # - name: Run Code Review Automation
+      #   if: github.event_name == 'pull_request' # Only run on PRs
+      #   run: python src/code_review_automation.py
+
+      # --- Commit potential changes made by scripts (lint fixes, generated tests) ---
+      - name: Commit LLM Changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          # Add generated reports and any modified/created files (tests, fixed source)
+          git add _llm_changes/
+          git add tests/
+          git add src/
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No LLM changes to commit."
+          else
+            git commit -m "chore: Apply LLM fixes and generated tests/reports"
+            git push origin HEAD:${{ github.head_ref || github.ref_name }} || echo "Push failed, maybe no changes or protected branch."
+          fi
+        # Continue even if commit/push fails (e.g., no changes, protected branch)
+        continue-on-error: true
+
+      # --- Setup and Build Jekyll Site ---
+      - name: Setup Ruby and Jekyll
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1' # Use a version compatible with github-pages gem
+          bundler-cache: true # Runs bundle install and caches gems
+
+      - name: Setup GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v4
+
+      - name: Build Jekyll site
+        # Use GITHUB_REPOSITORY to set baseurl correctly
+        run: JEKYLL_ENV=production bundle exec jekyll build --baseurl ${{ steps.pages.outputs.base_path }}
+        env:
+           JEKYLL_BASEURL: ${{ steps.pages.outputs.base_path }}
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        # Automatically uploads the '_site' directory
+
+      # --- Deploy to GitHub Pages ---
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        # This action handles the deployment to the gh-pages branch
+
+  # Optional: Job to create PR (if needed, and separate from main reporting)
+  # automate-pull-request:
+  #   runs-on: ubuntu-latest
+  #   needs: llm_tasks_and_report # Depends on the tasks being done
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/some-feature-branch' # Example condition
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0 # Required for git diff
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: '3.10'
+  #     - name: Install dependencies
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install -r requirements.txt
+  #     - name: Run automation script
+  #       run: python src/automate_pull_requests.py
