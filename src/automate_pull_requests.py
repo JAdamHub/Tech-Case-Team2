@@ -18,15 +18,35 @@ def get_changed_evaluate_files():
         event_name = os.getenv('GITHUB_EVENT_NAME')
         print(f"Detected ref: {ref_name}, event: {event_name}")
 
+        # Debug: List all files in evaluate folder
+        try:
+            eval_files = subprocess.run(['find', 'evaluate', '-name', '*.py'], capture_output=True, text=True, check=True)
+            print(f"Python files in evaluate directory:\n{eval_files.stdout}")
+        except Exception as e:
+            print(f"Could not list files in evaluate directory: {e}")
+
         comparison_target = ""
         diff_command_base = ['git', 'diff', '--name-only', '--diff-filter=ARM']
 
         if ref_name == 'main' and event_name == 'push':
+            # Log recent commits to debug fetch depth issues
+            try:
+                log_result = subprocess.run(['git', 'log', '-n', '5', '--pretty=oneline'], capture_output=True, text=True, check=True)
+                print("Recent Git log history:")
+                print(log_result.stdout)
+            except Exception as log_err:
+                print(f"Could not get git log: {log_err}")
+
+            # Try to ensure we have enough history
+            try:
+                print("Ensuring sufficient git history...")
+                subprocess.run(['git', 'fetch', '--unshallow'], capture_output=True, text=True)
+            except Exception as e:
+                print(f"Note: {e} - repository might already be complete")
+
             # Compare the last two commits on main after a push
-            # Ensure fetch depth is sufficient in the workflow (fetch-depth: 2 or 0)
             print("Running on main branch after push. Comparing HEAD~1 to HEAD.")
             comparison_target = ['HEAD~1', 'HEAD']
-            # No explicit fetch needed here as checkout action should handle fetch-depth
         else:
             # Default behavior: Compare against base branch (for PRs or manual runs)
             base_ref = os.getenv('GITHUB_BASE_REF') # Typically set on pull_request events
@@ -50,6 +70,29 @@ def get_changed_evaluate_files():
                     print(f"Warning: Failed to fetch main branch: {fetch_error.stderr}. The diff might be inaccurate.")
             comparison_target = [base_branch]
 
+        # First attempt: Specialized find for Python files that changed in evaluate dir
+        try:
+            print("Trying alternative detection method...")
+            if ref_name == 'main' and event_name == 'push':
+                # Get changed file list using broader approach
+                changed_files_cmd = ['git', 'diff', '--name-only', 'HEAD~1', 'HEAD']
+            else:
+                base_branch = f'origin/{os.getenv("GITHUB_BASE_REF", "main")}'
+                changed_files_cmd = ['git', 'diff', '--name-only', base_branch]
+                
+            result = subprocess.run(changed_files_cmd, capture_output=True, text=True, check=True)
+            all_changed = result.stdout.strip().split('\n')
+            print(f"All changed files:\n{all_changed}")
+            
+            # Filter for Python files in evaluate directory
+            evaluate_py_files = [f for f in all_changed if f.startswith('evaluate/') and f.endswith('.py')]
+            if evaluate_py_files:
+                print(f"Found Python files in evaluate using alternative method: {evaluate_py_files}")
+                return evaluate_py_files
+        except Exception as alt_err:
+            print(f"Alternative detection failed: {alt_err}")
+
+        # If alternative method failed, try original method
         # Construct the full diff command
         diff_command = diff_command_base + comparison_target + ['--', 'evaluate/**/*.py']
         print(f"Running git diff command: {' '.join(diff_command)}")
@@ -65,7 +108,8 @@ def get_changed_evaluate_files():
         print(f"Git diff output:\n{result.stdout.strip()}")
 
         files = result.stdout.strip().split('\n')
-        changed_files = [f for f in files if f and os.path.exists(f)] 
+        # Don't filter for existence - file might be in git but not in working tree
+        changed_files = [f for f in files if f] 
         
         if not changed_files:
             print(f"No changed Python files detected in evaluate/ based on the comparison.")
@@ -78,9 +122,20 @@ def get_changed_evaluate_files():
         # Handle cases like insufficient fetch depth for HEAD~1 or other git errors
         print(f"Warning: git diff command failed: {e}")
         print(f"Command stderr: {e.stderr}")
-        if "unknown revision or path not in the working tree" in e.stderr and 'HEAD~1' in diff_command:
+        if "unknown revision or path not in the working tree" in e.stderr and 'HEAD~1' in str(diff_command):
              print("This might be due to insufficient fetch depth in your Git checkout.")
-             print("Ensure your workflow's checkout step uses 'fetch-depth: 2' or 'fetch-depth: 0'.")
+             
+             # Fall back to listing all Python files in evaluate as a last resort
+             try:
+                 print("Falling back to listing all Python files in evaluate/...")
+                 result = subprocess.run(['find', 'evaluate', '-name', '*.py'], 
+                                         capture_output=True, text=True, check=True)
+                 all_py_files = result.stdout.strip().split('\n')
+                 print(f"Found {len(all_py_files)} Python files in evaluate/")
+                 return [f for f in all_py_files if f]
+             except Exception as find_err:
+                 print(f"Failed to list Python files: {find_err}")
+                 
         print(f"Assuming no changed files due to diff error.")
         return []
     except Exception as e:
@@ -96,6 +151,14 @@ def save_files_to_process(file_list):
             for file_path in file_list:
                 f.write(f"{file_path}\n")
         print(f"Saved list of files to process in {FILES_TO_PROCESS_PATH}")
+                
+        # Check if the file was created and what's in it
+        if os.path.exists(FILES_TO_PROCESS_PATH):
+            with open(FILES_TO_PROCESS_PATH, 'r') as f:
+                content = f.read()
+            print(f"Content of {FILES_TO_PROCESS_PATH}:\n{content}")
+        else:
+            print(f"Warning: {FILES_TO_PROCESS_PATH} was not created!")
     except Exception as e:
         print(f"Error saving file list to {FILES_TO_PROCESS_PATH}: {e}")
 

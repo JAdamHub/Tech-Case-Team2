@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false # Set back to false as we'll use explicit token URL
-          fetch-depth: 2 # Fetch all history for git diff
+          fetch-depth: 0 # Ændret fra 2 til 0 for at hente hele git-historikken
 
       - name: Set up Python
         uses: actions/setup-python@v5
