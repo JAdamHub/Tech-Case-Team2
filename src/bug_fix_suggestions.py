@@ -107,7 +107,7 @@ def get_ai_suggestions(file_content, bugs):
         
         # Using OpenAI to generate suggestions
         response = openai.chat.completions.create(
-            model="3o-mini",
+            model="o3-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that analyzes Python code and suggests bug fixes."},
                 {"role": "user", "content": prompt}

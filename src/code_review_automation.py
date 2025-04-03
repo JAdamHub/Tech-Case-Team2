@@ -112,7 +112,7 @@ def review_code_with_ai(file_path, content):
         
         # Using OpenAI to generate review comments
         response = openai.chat.completions.create(
-            model="3o-mini",
+            model="o3-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that reviews code and provides constructive feedback."},
                 {"role": "user", "content": prompt}

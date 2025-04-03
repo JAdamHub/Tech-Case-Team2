@@ -118,7 +118,7 @@ def fix_linting_issues_with_ai(file_path, issues):
         
         # Using OpenAI to generate completion
         response = openai.chat.completions.create(
-            model="3o-mini",
+            model="o3-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that fixes Python code linting issues."},
                 {"role": "user", "content": prompt}

@@ -39,7 +39,7 @@ def generate_pr_description(diff):
         
         # Using OpenAI to generate PR description
         response = openai.chat.completions.create(
-            model="3o-mini",
+            model="o3-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that writes detailed pull request descriptions."},
                 {"role": "user", "content": prompt}

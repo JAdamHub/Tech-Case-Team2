@@ -127,7 +127,7 @@ def generate_test_file_with_ai(file_path, test_requirements):
         
         # Using OpenAI to generate test file
         response = openai.chat.completions.create(
-            model="3o-mini",
+            model="o3-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that generates Python test code."},
                 {"role": "user", "content": prompt}
