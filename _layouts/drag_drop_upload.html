@@ -290,15 +290,19 @@ title: Document Upload
                 }
                 hideError(); // Hide error message on success
             } else {
-                status.textContent = data.error;
+                // Show the specific error message from the server
+                const errorMessage = data.error || 'Upload failed';
+                const errorDetails = data.details || 'An unknown error occurred';
+                
+                status.textContent = errorMessage;
                 status.classList.add('error');
-                if (data.details) {
-                    const details = document.createElement('span');
-                    details.className = 'file-details';
-                    details.textContent = data.details;
-                    status.appendChild(details);
-                }
-                showError(data.error, data.details);
+                
+                const details = document.createElement('span');
+                details.className = 'file-details';
+                details.textContent = errorDetails;
+                status.appendChild(details);
+                
+                showError(errorMessage, errorDetails);
             }
         })
         .catch(error => {
