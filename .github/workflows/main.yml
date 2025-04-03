@@ -145,6 +145,3 @@ jobs:
 
       - name: Create Pull Request
         run: python src/automate_pull_requests.py
-
-      - name: Create Summary Index
-        run: python -c "from utils import create_summary_index; create_summary_index()"
