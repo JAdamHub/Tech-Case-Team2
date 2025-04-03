@@ -42,47 +42,13 @@ jobs:
         # This run creates files_to_process.txt
         run: python src/automate_pull_requests.py
 
-      # --- STEP 2: Run Analysis and Modification Scripts on identified files --- 
-      - name: Run Code Review Automation (code_review_automation.py)
-        # Reads files_to_process.txt
-        run: python src/code_review_automation.py
+      # --- STEP 2: Run Combined Analysis and Modification Script --- 
+      - name: Run Combined Analysis and Modifications (combined_flow.py)
+        id: combined_tasks
+        # Reads files_to_process.txt, potentially modifies files, generates combined report
+        run: python src/combined_flow.py
         
-      - name: Run Bug Fix Suggestions (Analysis Only - bug_fix_suggestions.py)
-        # Reads files_to_process.txt
-        run: python src/bug_fix_suggestions.py
-
-      - name: Run Admin Tasks Automation (Linting Fixes & Report) (automate_admin_tasks.py)
-        id: admin_tasks
-        # Reads files_to_process.txt, potentially modifies files
-        run: python src/automate_admin_tasks.py
-
-      - name: Run Workflow Bottleneck Mitigation (Test Generation & Report) (address_workflow_bottlenecks.py)
-        id: bottlenecks
-        # Reads files_to_process.txt, potentially creates/modifies files
-        run: python src/address_workflow_bottlenecks.py
-
-      # --- STEP 3: Consolidate Reports --- (Moved before commit)
-      - name: Create Summary Index for Reports
-        run: |
-          # Ensure the directory exists before running the script
-          mkdir -p _llm_changes
-          # Check if the consolidation script exists, run if it does
-          if [ -f utils/consolidate_reports.py ]; then
-            python utils/consolidate_reports.py
-          else
-            echo "Warning: utils/consolidate_reports.py not found, skipping report consolidation."
-          fi
-          # Ensure index.md exists even if script failed/didn't run
-          if [ ! -f _llm_changes/index.md ]; then
-             echo "---" > _llm_changes/index.md
-             echo "layout: page" >> _llm_changes/index.md
-             echo "title: LLM-generated Changes" >> _llm_changes/index.md
-             echo "---" >> _llm_changes/index.md
-             echo "# LLM-generated Changes" >> _llm_changes/index.md
-             echo "No reports consolidated yet." >> _llm_changes/index.md
-          fi
-          
-      # --- STEP 3.5: Remove files_to_process.txt before commit ---
+      # --- STEP 3: Remove files_to_process.txt before commit ---
       - name: Remove Temporary Files
         run: |
           # Remove temporary file to avoid committing it
