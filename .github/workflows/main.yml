@@ -24,8 +24,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-            persist-credentials: false # Set back to false as we'll use explicit token URL
-            fetch-depth: 0 # Fetch all history for git diff
+          persist-credentials: false # Set back to false as we'll use explicit token URL
+          fetch-depth: 2 # Fetch all history for git diff
 
       - name: Set up Python
         uses: actions/setup-python@v5
