@@ -89,11 +89,21 @@ jobs:
             - Applied automated code fixes (e.g., linting)
             - Generated new test files
             - Created LLM change reports" && 
-            git push || {
-              # Handle potential push errors (likely auth related)
+            # Explicitly set remote URL with token for authentication (NECESSARY due to previous failures)
+            git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} && 
+            # Determine the correct branch reference based on event type and push
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then 
+              echo "Pushing changes to PR branch: ${{ github.head_ref }}"; 
+              git push origin HEAD:${{ github.head_ref }}; 
+            else 
+              echo "Pushing changes to branch: ${{ github.ref_name }}"; 
+              git push origin HEAD:${{ github.ref_name }}; 
+            fi || {
+              # Handle potential push errors
               echo "Error: Failed to push changes."
-              echo "This might be the recurring authentication issue (fatal: could not read Username)."
-              echo "Consider re-adding explicit token authentication if this persists."
+              echo "Event type: ${{ github.event_name }}"
+              echo "Target branch/ref: ${{ github.head_ref || github.ref_name }}"
+              echo "This may be due to branch protection rules or token permissions."
               exit 1
             }
           ) || echo "No changes detected to commit."
