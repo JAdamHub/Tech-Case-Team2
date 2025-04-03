@@ -14,6 +14,7 @@ title: Document Upload
             <li>Make sure files are uploaded to: <code>converter_markdown/input_folder_markdown/</code></li>
             <li>Add a commit message (e.g., "Add markdown files")</li>
             <li>Click "Commit changes"</li>
+            <li>The files will be automatically processed and added to the repository</li>
         </ol>
     </div>
 
@@ -34,7 +35,14 @@ title: Document Upload
             <li>Files must be uploaded to the correct directory</li>
             <li>You need to be logged into GitHub to upload files</li>
             <li>The upload interface will open in a new tab</li>
+            <li>Files will be automatically processed and added to the repository</li>
+            <li>The GitHub Pages site will be automatically updated</li>
         </ul>
+    </div>
+
+    <div class="status-info">
+        <h3>Upload Status:</h3>
+        <p>After uploading, you can check the status of your upload in the <a href="https://github.com/{{ site.github_username }}/{{ site.github_repo }}/actions" target="_blank" rel="noopener noreferrer">Actions tab</a> of the repository.</p>
     </div>
 </div>
 
@@ -143,5 +151,28 @@ title: Document Upload
             padding: 0.75rem 1.5rem;
             font-size: 1rem;
         }
+    }
+    
+    .status-info {
+        background-color: #e8f5e9;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 2rem;
+        border: 1px solid #c8e6c9;
+    }
+    
+    .status-info h3 {
+        margin-top: 0;
+        color: #2e7d32;
+        font-size: 1.2rem;
+    }
+    
+    .status-info a {
+        color: #2e7d32;
+        text-decoration: underline;
+    }
+    
+    .status-info a:hover {
+        color: #1b5e20;
     }
 </style> 

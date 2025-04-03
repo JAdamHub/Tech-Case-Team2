@@ -2,7 +2,9 @@ name: Handle File Uploads
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
+    paths:
+      - 'converter_markdown/input_folder_markdown/**'
 
 jobs:
   process-upload:
@@ -12,6 +14,12 @@ jobs:
       pull-requests: write
     
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
       - name: Debug PR Info
         run: |
           echo "PR Title: ${{ github.event.pull_request.title }}"
@@ -19,12 +27,6 @@ jobs:
           echo "PR Number: ${{ github.event.pull_request.number }}"
           echo "PR Head Ref: ${{ github.head_ref }}"
           echo "PR Base Ref: ${{ github.base_ref }}"
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -75,4 +77,11 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number,
               merge_method: 'squash'
-            }) 
+            })
+
+      - name: Update GitHub Pages
+        uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: _site 
