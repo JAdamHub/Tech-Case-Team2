@@ -19,7 +19,7 @@ def list_index_error():
     my_list = [1, 2, 3]
     return my_list[5]  
 
-
+#this are alredy set in the code 
 a = input("Enter a number: ")
 b = input("Enter another number: ")
 print("Addition:", add_numbers(a, b))
