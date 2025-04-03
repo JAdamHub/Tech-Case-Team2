@@ -84,40 +84,6 @@ def review_code_with_ai(file_path, content):
         print(f"Error reviewing code: {e}")
         return "Could not generate review comments."
 
-def post_review_comments(repo_name, pr_number, file_path, review_comments):
-    """Post review comments to GitHub PR"""
-    try:
-        load_dotenv()
-        github_token = os.getenv("GITHUB_TOKEN")
-        if not github_token:
-            print("GITHUB_TOKEN environment variable not set.")
-            return False
-        
-        g = Github(github_token)
-        repo = g.get_repo(repo_name)
-        pr = repo.get_pull(int(pr_number))
-        
-        # Extract line-specific comments from the AI review
-        # This is a simplified approach - in a real implementation, you would want
-        # to parse the AI output more carefully to get precise line numbers
-        line_pattern = re.compile(r'line (\d+)', re.IGNORECASE)
-        lines_mentioned = line_pattern.findall(review_comments)
-        
-        if lines_mentioned:
-            # Post individual line comments
-            for line in lines_mentioned:
-                line_num = int(line)
-                # Get the relevant section of the review for this line
-                line_context = review_comments.split(f"line {line}")[1].split("line")[0] if len(lines_mentioned) > 1 else review_comments
-                pr.create_review_comment(body=f"AI review for line {line}: {line_context}", commit_id=pr.get_commits().reversed[0].sha, path=file_path, position=line_num)
-        else:
-            # Post a general comment if no specific lines are mentioned
-            pr.create_issue_comment(f"AI Code Review for {file_path}:\n\n{review_comments}")
-        
-        return True
-    except Exception as e:
-        print(f"Error posting review comments: {e}")
-        return False
 
 def save_review_to_file(file_path, review_comments, content):
     """Save review comments to a Python file in the changes/reviews directory"""
