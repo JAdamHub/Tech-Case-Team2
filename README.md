@@ -1,7 +1,5 @@
 # LLM Code Automation Hub 🤖✨
 
-![GitHub Actions Workflow Status](https://github.com/Tech-Case-Team2/workflows/LLM%20Automation%20and%20Reporting/badge.svg)
-
 ## 🌟 Project Overview
 
 This project leverages the power of Large Language Models (LLMs) to automate common software development tasks, reduce repetitive work, and increase developer productivity. Using a combination of GitHub Actions, Flask, and OpenAI's API, we've built a comprehensive system that can analyze code changes, suggest improvements, generate tests, and create meaningful reports.
