@@ -1,14 +1,13 @@
+#!/usr/bin/env python3
 """Module for arithmetic and string operations with sample functions."""
 
 def add_numbers(x, y):
     """Return the sum of x and y."""
     return x + y
 
-
 def subtract_numbers(x, y):
     """Return the difference between x and y."""
     return x - y
-
 
 def multiply_numbers(x, y):
     """Return the product of x and y."""
