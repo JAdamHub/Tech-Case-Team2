@@ -574,7 +574,7 @@ file_name: "{file_name}"
 """
     
     # Report header
-    report_content = f"""# {report_title}
+    report_content = f"""# 📊 {report_title}
 Generated on: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}
 
 This report contains code review, bug fix suggestions, linting fixes, and test generation for {file_path}.
@@ -582,20 +582,20 @@ This report contains code review, bug fix suggestions, linting fixes, and test g
 """
     
     # Add detailed results for the file
-    report_content += f"\n## File: {file_path}\n\n"
+    report_content += f"\n## 📁 File: {file_path}\n\n"
     
     # Code Review section
     if file_result.get('code_review'):
-        report_content += "### Code Review\n\n"
+        report_content += "### 🔍 Code Review\n\n"
         report_content += "```python\n"
         report_content += file_result['code_review']
         report_content += "\n```\n\n"
     
     # Bug Fixes section
     if file_result.get('bugs'):
-        report_content += "### Bug Fix Suggestions\n\n"
+        report_content += "### 🐛 Bug Fix Suggestions\n\n"
         for i, bug in enumerate(file_result['bugs'], 1):
-            report_content += f"#### Issue {i}: {bug['type']}\n"
+            report_content += f"#### ⚠️ Issue {i}: {bug['type']}\n"
             if 'line' in bug:
                 report_content += f"- Line: {bug['line']}\n"
             if 'suggestion' in bug:
@@ -612,20 +612,20 @@ This report contains code review, bug fix suggestions, linting fixes, and test g
     
     # Linting Issues section
     if file_result.get('linting_issues'):
-        report_content += "### Linting Issues\n\n"
+        report_content += "### 🔧 Linting Issues\n\n"
         for issue in file_result['linting_issues']:
             report_content += f"- Line {issue['line']}: {issue['message']} ({issue['symbol']})\n"
         report_content += "\n"
         
         if file_result.get('linting_diff'):
-            report_content += "#### Linting Fixes\n\n"
+            report_content += "#### 🛠️ Linting Fixes\n\n"
             report_content += "```diff\n"
             report_content += file_result['linting_diff']
             report_content += "\n```\n\n"
     
     # Test Generation section
     if file_result.get('test_file'):
-        report_content += "### Generated Tests\n\n"
+        report_content += "### 🧪 Generated Tests\n\n"
         report_content += f"Test file created: `{file_result['test_file']}`\n\n"
         
         if file_result.get('test_content'):
@@ -634,7 +634,7 @@ This report contains code review, bug fix suggestions, linting fixes, and test g
             report_content += "\n```\n\n"
         
         if file_result.get('test_results'):
-            report_content += "#### Test Results\n\n"
+            report_content += "#### ✅ Test Results\n\n"
             report_content += "```\n"
             report_content += file_result['test_results']
             report_content += "\n```\n\n"
@@ -674,36 +674,36 @@ consolidated: true
 """
     
     # Report header
-    report_content = f"""# {report_title}
+    report_content = f"""# 📑 {report_title}
 Generated on: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}
 
 This report combines code review, bug fix suggestions, linting fixes, and test generation for the analyzed files.
 
-## Summary
+## 📊 Summary
 
-- **Files Analyzed**: {len(file_results)}
-- **Code Reviews**: {sum(1 for f in file_results if f.get('code_review'))}
-- **Bug Fixes**: {sum(1 for f in file_results if f.get('bugs'))}
-- **Linting Issues**: {sum(1 for f in file_results if f.get('linting_issues'))}
-- **Tests Generated**: {sum(1 for f in file_results if f.get('test_file'))}
+- **📁 Files Analyzed**: {len(file_results)}
+- **🔍 Code Reviews**: {sum(1 for f in file_results if f.get('code_review'))}
+- **🐛 Bug Fixes**: {sum(1 for f in file_results if f.get('bugs'))}
+- **🔧 Linting Issues**: {sum(1 for f in file_results if f.get('linting_issues'))}
+- **🧪 Tests Generated**: {sum(1 for f in file_results if f.get('test_file'))}
 
 """
     
     # Add detailed results for each file
     for file_result in file_results:
         file_path = file_result['file_path']
-        report_content += f"\n## File: {file_path}\n\n"
+        report_content += f"\n## 📁 File: {file_path}\n\n"
         
         # Code Review section
         if file_result.get('code_review'):
-            report_content += "### Code Review\n\n"
+            report_content += "### 🔍 Code Review\n\n"
             report_content += "```python\n"
             report_content += file_result['code_review']
             report_content += "\n```\n\n"
         
         # Bug Fixes section
         if file_result.get('bugs'):
-            report_content += "### Bug Fix Suggestions\n\n"
+            report_content += "### 🐛 Bug Fix Suggestions\n\n"
             for i, bug in enumerate(file_result['bugs'], 1):
                 report_content += f"#### Issue {i}: {bug['type']}\n"
                 if 'line' in bug:
@@ -728,14 +728,14 @@ This report combines code review, bug fix suggestions, linting fixes, and test g
             report_content += "\n"
             
             if file_result.get('linting_diff'):
-                report_content += "#### Linting Fixes\n\n"
+                report_content += "#### 🛠️ Linting Fixes\n\n"
                 report_content += "```diff\n"
                 report_content += file_result['linting_diff']
                 report_content += "\n```\n\n"
         
         # Test Generation section
         if file_result.get('test_file'):
-            report_content += "### Generated Tests\n\n"
+            report_content += "### 🧪 Generated Tests\n\n"
             report_content += f"Test file created: `{file_result['test_file']}`\n\n"
             
             if file_result.get('test_content'):
@@ -744,7 +744,7 @@ This report combines code review, bug fix suggestions, linting fixes, and test g
                 report_content += "\n```\n\n"
             
             if file_result.get('test_results'):
-                report_content += "#### Test Results\n\n"
+                report_content += "#### ✅ Test Results\n\n"
                 report_content += "```\n"
                 report_content += file_result['test_results']
                 report_content += "\n```\n\n"
