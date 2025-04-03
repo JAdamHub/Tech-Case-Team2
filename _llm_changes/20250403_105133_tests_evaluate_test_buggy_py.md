@@ -1,3 +1,12 @@
+---
+layout: llm_change # Using the same layout, but could create a specific one
+title: "Generated Tests for buggy.py"
+date: 2025-04-03T10:51:33.044629
+file: "tests/evaluate/test_buggy.py" # Report is about the test file
+change_type: "Test Generation"
+source_file: "evaluate/buggy.py"
+---
+```python
 import pytest
 from evaluate.buggy import (
     add_numbers,
@@ -45,3 +54,4 @@ def test_list_index_error():
     # list_index_error will attempt to access an out-of-bound index in the list, raising IndexError.
     with pytest.raises(IndexError):
         list_index_error()
+```
