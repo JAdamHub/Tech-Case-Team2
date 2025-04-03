@@ -20,6 +20,4 @@ Welcome to LLM Code Automation Hub - a central place where you can follow all AI
   {% endfor %}
 </ul>
 
-<div class="view-all">
-  <a href="{{ '/all-changes' | relative_url }}" class="button">View all changes</a>
 </div> 
