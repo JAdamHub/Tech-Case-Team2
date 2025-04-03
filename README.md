@@ -1,5 +1,7 @@
 # Tech case for AAU Case Competition
 
+https://jadamhub.github.io/Tech-Case-Team2/
+
 ## Context
 
 In today’s fast-paced software industry, companies like Vestas face increasing pressure to innovate while maintaining efficient development processes. Software engineers are responsible for a wide range of tasks—from fixing bugs and writing new features to reviewing code and ensuring best practices. This leaves limited time for creative problem-solving, as much of their effort is spent on repetitive or administrative tasks.
