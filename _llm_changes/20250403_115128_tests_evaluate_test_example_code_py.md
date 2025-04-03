@@ -1,3 +1,12 @@
+---
+layout: llm_change
+title: "Generated Tests for example_code.py"
+date: 2025-04-03T11:51:28.105622
+file: "tests/evaluate/test_example_code.py"
+change_type: "Test Generation"
+source_file: "evaluate/example_code.py"
+---
+```python
 import pytest
 from evaluate.example_code import (
     add,
@@ -93,3 +102,4 @@ def test_faulty_logic():
     result1 = faulty_logic(15, 10)  # Expected: 10 - 15 = -5, not 5
     result2 = faulty_logic(10, 15)  # Expected: 10 - 15 = -5
     assert result1 == result2 == -5
+```
