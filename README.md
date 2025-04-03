@@ -51,7 +51,7 @@ A Flask-based server that allows:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/YourUsername/Tech-Case-Team2.git
+   git clone https://github.com/JAdamhub/Tech-Case-Team2.git
    cd Tech-Case-Team2
    ```
 
