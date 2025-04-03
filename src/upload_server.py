@@ -1,15 +1,14 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            static_folder='.',
+            template_folder='_layouts')
 
 # Configure upload folder
 UPLOAD_FOLDER = 'converter_markdown/input_folder'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
-# Configure layouts folder
-LAYOUTS_FOLDER = '_layouts'
 
 @app.route('/')
 def home():
@@ -17,7 +16,7 @@ def home():
 
 @app.route('/upload')
 def upload_page():
-    return send_from_directory(LAYOUTS_FOLDER, 'drag_drop_upload.html')
+    return render_template('drag_drop_upload.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
