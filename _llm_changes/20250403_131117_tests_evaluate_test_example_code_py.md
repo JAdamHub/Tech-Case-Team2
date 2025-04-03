@@ -1,3 +1,13 @@
+---
+layout: llm_change
+title: "Generated Tests for example_code.py"
+date: 2025-04-03T13:11:17.431582
+file: "tests/evaluate/test_example_code.py"
+change_type: "Test Generation"
+source_file: "evaluate/example_code.py"
+consolidated: true
+---
+```python
 import pytest
 from evaluate.example_code import (
     add,
@@ -100,3 +110,4 @@ def test_faulty_logic():
     # Additional test to see potential unexpected behavior
     # a slightly greater than b
     assert faulty_logic(10, 9) == -1, "Expected faulty_logic to subtract larger number first when a > b"
+```
