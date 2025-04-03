@@ -272,29 +272,28 @@ title: Document Upload
             // Read file content
             const content = await file.text();
             
-            // Get GitHub token from environment variable or prompt
-            const token = await getGitHubToken();
-            if (!token) {
-                throw new Error('GitHub token is required');
-            }
-
             // Get repository info from URL
             const repoInfo = getRepoInfo();
             if (!repoInfo) {
                 throw new Error('Could not determine repository information');
             }
 
-            // Create or update file using GitHub API
-            const response = await fetch(`https://api.github.com/repos/${repoInfo.owner}/${repoInfo.repo}/contents/converter_markdown/input_folder_markdown/${file.name}`, {
-                method: 'PUT',
+            // Create a new branch name based on timestamp
+            const branchName = `upload-${Date.now()}`;
+            
+            // Create a pull request using GitHub API
+            const response = await fetch(`https://api.github.com/repos/${repoInfo.owner}/${repoInfo.repo}/pulls`, {
+                method: 'POST',
                 headers: {
-                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    message: `Add ${file.name}`,
-                    content: btoa(unescape(encodeURIComponent(content))),
-                    branch: 'main'
+                    title: `[GH-PAGES-UPLOAD] Upload ${file.name}`,
+                    head: branchName,
+                    base: 'main',
+                    body: `Uploading file ${file.name} through GitHub Pages interface\n\n<!-- GH-PAGES-UPLOAD -->`,
+                    maintainer_can_modify: true
                 })
             });
 
@@ -302,14 +301,12 @@ title: Document Upload
 
             const status = fileItem.querySelector('.status');
             if (response.ok) {
-                status.textContent = 'Uploaded successfully';
+                status.textContent = 'Upload request created';
                 status.classList.add('success');
-                if (data.content) {
-                    const details = document.createElement('span');
-                    details.className = 'file-details';
-                    details.textContent = `Saved to: ${data.content.path}`;
-                    status.appendChild(details);
-                }
+                const details = document.createElement('span');
+                details.className = 'file-details';
+                details.textContent = `Pull request #${data.number} created`;
+                status.appendChild(details);
                 hideError();
             } else {
                 const errorMessage = data.message || 'Upload failed';
@@ -341,7 +338,7 @@ title: Document Upload
     function getRepoInfo() {
         // Get repository info from current URL
         const url = window.location.href;
-        const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+        const match = url.match(/github\.io\/([^\/]+)\/([^\/]+)/);
         if (match) {
             return {
                 owner: match[1],
@@ -349,20 +346,5 @@ title: Document Upload
             };
         }
         return null;
-    }
-
-    async function getGitHubToken() {
-        // Try to get token from localStorage first
-        let token = localStorage.getItem('github_token');
-        
-        if (!token) {
-            // Prompt user for token
-            token = prompt('Please enter your GitHub Personal Access Token:');
-            if (token) {
-                localStorage.setItem('github_token', token);
-            }
-        }
-        
-        return token;
     }
 </script> 
