@@ -39,7 +39,7 @@ jobs:
 
       # --- Run LLM Tasks that Modify Code/Generate Reports ---
       - name: Automating Pull Request (automate_pull_requests.py.py)
-        run: python src/automate_pull_requests.py.py
+        run: python src/automate_pull_requests.py
 
       - name: Run Bug Fix Suggestions (Analysis Only - bug_fix_suggestions.py)
         run: python src/bug_fix_suggestions.py
