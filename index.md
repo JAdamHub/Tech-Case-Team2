@@ -18,8 +18,4 @@ Welcome to LLM Code Automation Hub - a central place where you can follow all AI
       <span class="change-date">{{ change.date | date: "%d-%m-%Y %H:%M" }}</span>
     </li>
   {% endfor %}
-</ul>
-
-<div class="view-all">
-  <a href="{{ '/all-changes' | relative_url }}" class="button">View all changes</a>
-</div> 
+</ul> 
