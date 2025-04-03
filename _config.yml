@@ -1,7 +1,7 @@
 # Basic Jekyll configuration
 title: LLM Code Change Tracker
 description: Visualizing code modifications made by AI.
-baseurl: "/pull_test" # Set this to your repository name if deploying to user/org pages, or leave blank for project pages root
+baseurl: "/Tech-Case-Team2" # Set this to your repository name if deploying to user/org pages, or leave blank for project pages root
 url: "" # Set this to your GitHub Pages URL if needed (e.g., https://username.github.io)
 
 # Build settings

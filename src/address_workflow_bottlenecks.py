@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-import together
+import openai
 import json
 import re
 import pytest
@@ -84,9 +84,9 @@ def generate_test_file_with_ai(file_path, test_requirements):
             original_content = f.read()
             
         load_dotenv()
-        api_key = os.getenv("TOGETHER_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-             print("Error: TOGETHER_API_KEY environment variable not set.")
+             print("Error: OPENAI_API_KEY environment variable not set.")
              return None
         
         # Determine the test file name relative to the project root
@@ -125,16 +125,16 @@ def generate_test_file_with_ai(file_path, test_requirements):
         Generate the complete Python code for the test file `{test_file_rel_path}`. Respond ONLY with the Python code enclosed in ```python ... ``` blocks.
         """
         
-        # Using TogetherAI to generate test file
-        response = together.Completion.create(
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        # Using OpenAI to generate test file
+        response = openai.Completion.create(
+            model="3o-mini",
             prompt=f"<s>[INST] {prompt} [/INST]",
             max_tokens=2048,
             temperature=0.2,
             top_p=0.95,
         )
         
-        # Opdateret response håndtering
+        # Updated response handling
         test_file_content_raw = response.choices[0].text
         
         # Clean up the response
@@ -155,7 +155,7 @@ def generate_test_file_with_ai(file_path, test_requirements):
         }
         
     except Exception as e:
-        print(f"Error interacting with Together API for test generation: {e}")
+        print(f"Error interacting with OpenAI for test generation: {e}")
         return None
     except FileNotFoundError:
          print(f"Error: Source file not found at {file_path}")

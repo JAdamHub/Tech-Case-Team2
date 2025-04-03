@@ -1,6 +1,6 @@
 import os
 import re
-import together
+import openai
 import requests
 from dotenv import load_dotenv
 from github import Github
@@ -17,12 +17,12 @@ def get_git_diff():
         return None
 
 def generate_pr_description(diff):
-    """Generate a PR description based on the code changes using TogetherAI"""
+    """Generate a PR description based on the code changes using OpenAI"""
     try:
         load_dotenv()
-        api_key = os.getenv("TOGETHER_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            print("Error: TOGETHER_API_KEY environment variable not set.")
+            print("Error: OPENAI_API_KEY environment variable not set.")
             return "Automated Pull Request"
         
         prompt = f"""
@@ -37,9 +37,9 @@ def generate_pr_description(diff):
         {diff[:4000]}  # Limit the diff size to avoid token limits
         """
         
-        # Using TogetherAI to generate PR description
-        response = together.Completion.create(
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        # Using OpenAI to generate PR description
+        response = openai.Completion.create(
+            model="3o-mini",
             prompt=f"<s>[INST] {prompt} [/INST]",
             max_tokens=1024,
             temperature=0.7,  # Slightly higher temperature for creative PR descriptions

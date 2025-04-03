@@ -1,7 +1,6 @@
 PyGithub
 openai
 pylint
-together
 pytest
 requests
 python-dotenv

@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 import re
-import together
+import openai
 from dotenv import load_dotenv
 import tempfile
 import difflib
@@ -96,9 +96,9 @@ def fix_linting_issues_with_ai(file_path, issues):
         issues_text = "\n".join([f"- Line {issue['line']}: {issue['message']} ({issue['symbol']})" for issue in issues])
         
         load_dotenv()
-        api_key = os.getenv("TOGETHER_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-             print("Error: TOGETHER_API_KEY environment variable not set.")
+             print("Error: OPENAI_API_KEY environment variable not set.")
              return original_content, None
         
         prompt = f"""
@@ -116,16 +116,16 @@ def fix_linting_issues_with_ai(file_path, issues):
         Ensure all the listed linting issues are resolved in the corrected code.
         """
         
-        # Using TogetherAI to generate completion
-        response = together.Completion.create(
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        # Using OpenAI to generate completion
+        response = openai.Completion.create(
+            model="3o-mini",
             prompt=f"<s>[INST] {prompt} [/INST]",
             max_tokens=2048,
             temperature=0.2,
             top_p=0.95,
         )
         
-        # Opdateret response håndtering
+        # Updated response handling
         fixed_code_raw = response.choices[0].text
         
         match = re.search(r"```python\n(.*?)\n```", fixed_code_raw, re.DOTALL)
@@ -143,7 +143,7 @@ def fix_linting_issues_with_ai(file_path, issues):
                 return original_content, fixed_code_raw.strip()
         
     except Exception as e:
-        print(f"Error interacting with Together API: {e}")
+        print(f"Error interacting with OPENAI API: {e}")
         return original_content, None
     except FileNotFoundError:
         print(f"Error: File not found at {file_path}")

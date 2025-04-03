@@ -1,6 +1,6 @@
 import os
 import re
-import together
+import openai
 from dotenv import load_dotenv
 from github import Github
 import subprocess
@@ -81,9 +81,9 @@ def review_code_with_ai(file_path, content):
     """Generate code review comments using AI"""
     try:
         load_dotenv()
-        api_key = os.getenv("TOGETHER_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            print("Error: TOGETHER_API_KEY environment variable not set.")
+            print("Error: OPENAI_API_KEY environment variable not set.")
             return "Could not generate review comments due to missing API key."
         
         # Determine file type
@@ -110,9 +110,9 @@ def review_code_with_ai(file_path, content):
         ```
         """
         
-        # Using TogetherAI to generate review comments
-        response = together.Completion.create(
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        # Using OpenAI to generate review comments
+        response = openai.Completion.create(
+            model="3o-mini",
             prompt=f"<s>[INST] {prompt} [/INST]",
             max_tokens=1536,
             temperature=0.2,

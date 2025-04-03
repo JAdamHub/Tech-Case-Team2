@@ -1,7 +1,7 @@
 import os
 import ast
 import re
-import together
+import openai
 from dotenv import load_dotenv
 import subprocess
 
@@ -86,9 +86,9 @@ def get_ai_suggestions(file_content, bugs):
     """Get AI-generated suggestions for fixing bugs"""
     try:
         load_dotenv()
-        api_key = os.getenv("TOGETHER_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            print("Error: TOGETHER_API_KEY environment variable not set.")
+            print("Error: OPENAI_API_KEY environment variable not set.")
             return "Could not generate AI suggestions due to missing API key."
         
         # Create a comprehensive prompt
@@ -105,9 +105,9 @@ def get_ai_suggestions(file_content, bugs):
         Please provide specific code fixes that can be applied to resolve these issues.
         """
         
-        # Using TogetherAI to generate suggestions
-        response = together.Completion.create(
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        # Using OpenAI to generate suggestions
+        response = openai.Completion.create(
+            model="3o-mini",
             prompt=f"<s>[INST] {prompt} [/INST]",
             max_tokens=1024,
             temperature=0.2,
