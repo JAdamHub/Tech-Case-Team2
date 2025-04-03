@@ -184,26 +184,35 @@ def automate_code_review():
         print("No files to review.")
         return
     
-    for file_path, content in files:
+    for file_path in files:
         print(f"\nReviewing {file_path}...")
         
-        # Use AI to generate review comments
-        review_comments = review_code_with_ai(file_path, content)
-        
-        # In GitHub Actions context, post comments to PR
-        if os.getenv("GITHUB_ACTIONS") == "true":
-            repo_name = os.getenv("GITHUB_REPOSITORY")
-            pr_number = os.getenv("PR_NUMBER")
-            if repo_name and pr_number:
-                posted = post_review_comments(repo_name, pr_number, file_path, review_comments)
-                if posted:
-                    print(f"Posted review comments for {file_path}.")
-                else:
-                    print(f"Failed to post review comments for {file_path}.")
-        
-        # Print review locally
-        print("\nAI Code Review:")
-        print(review_comments)
+        try:
+            # Read the file content
+            with open(file_path, 'r') as f:
+                content = f.read()
+            
+            # Use AI to generate review comments
+            review_comments = review_code_with_ai(file_path, content)
+            
+            # In GitHub Actions context, post comments to PR
+            if os.getenv("GITHUB_ACTIONS") == "true":
+                repo_name = os.getenv("GITHUB_REPOSITORY")
+                pr_number = os.getenv("PR_NUMBER")
+                if repo_name and pr_number:
+                    posted = post_review_comments(repo_name, pr_number, file_path, review_comments)
+                    if posted:
+                        print(f"Posted review comments for {file_path}.")
+                    else:
+                        print(f"Failed to post review comments for {file_path}.")
+            
+            # Print review locally
+            print("\nAI Code Review:")
+            print(review_comments)
+            
+        except Exception as e:
+            print(f"Error processing file {file_path}: {e}")
+            continue
 
 if __name__ == '__main__':
     automate_code_review()
