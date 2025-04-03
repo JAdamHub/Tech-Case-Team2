@@ -1,3 +1,13 @@
+---
+layout: llm_change
+title: "Generated Tests for test copy.py"
+date: 2025-04-03T15:01:49.900950
+file: "tests/evaluate/test_test copy.py"
+change_type: "Test Generation"
+source_file: "evaluate/test copy.py"
+consolidated: true
+---
+```python
 import pytest
 from evaluate.test_copy import (
     add_numbers,
@@ -59,3 +69,4 @@ def test_list_index_error():
     result = list_index_error()
     # According to the implementation, it returns the first element of [1, 2, 3]
     assert result == 1
+```
