@@ -1,0 +1,15 @@
+---
+layout: default
+---
+
+# {{ page.title }}
+
+**File:** `{{ page.file }}`  
+**Date:** {{ page.date | date: "%Y-%m-%d %H:%M" }}  
+**Type:** {{ page.change_type }}
+
+## Changes Made
+
+```diff
+{{ content }}
+``` 
