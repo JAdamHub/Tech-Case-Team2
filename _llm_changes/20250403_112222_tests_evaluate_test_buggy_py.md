@@ -1,3 +1,12 @@
+---
+layout: llm_change # Using the same layout, but could create a specific one
+title: "Generated Tests for buggy.py"
+date: 2025-04-03T11:22:22.595800
+file: "tests/evaluate/test_buggy.py" # Report is about the test file
+change_type: "Test Generation"
+source_file: "evaluate/buggy.py"
+---
+```python
 import pytest
 from evaluate.buggy import (
     add_numbers,
@@ -55,3 +64,4 @@ def test_list_index_error():
     # it tries to access an index that doesn't exist.
     with pytest.raises(IndexError):
         list_index_error()
+```
