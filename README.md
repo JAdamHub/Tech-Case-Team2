@@ -89,11 +89,11 @@ The system follows this process:
 
 ### Viewing Code Change Reports
 
-Visit the GitHub Pages site at: [https://yourteam.github.io/Tech-Case-Team2/](https://yourteam.github.io/Tech-Case-Team2/)
+Visit the GitHub Pages site at: [https://JAdamhub.github.io/Tech-Case-Team2/](https://JAdamhub.github.io/Tech-Case-Team2/)
 
 ### Uploading Your Own Files
 
-Access the upload page at: [https://yourteam.github.io/Tech-Case-Team2/drag-drop](https://yourteam.github.io/Tech-Case-Team2/drag-drop)
+Access the upload page at: [https://JAdamhub.github.io/Tech-Case-Team2/drag-drop](https://JAdamhub.github.io/Tech-Case-Team2/drag-drop)
 
 ## 🏗️ Architecture
 
