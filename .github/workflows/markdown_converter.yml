@@ -1,0 +1,40 @@
+name: Markdown to HTML Converter
+
+on:
+  push:
+    paths:
+      - 'converter_markdown/input_folder_markdown/**/*.md'
+
+jobs:
+  convert-markdown:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install openai python-dotenv
+    
+    - name: Create output directory
+      run: mkdir -p converter_markdown/output_folder_markdown
+    
+    - name: Run markdown converter
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        python converter_markdown/md_to_html_converter.py
+    
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add converter_markdown/output_folder_markdown/
+        git commit -m "Auto-generated HTML files from markdown" || echo "No changes to commit"
+        git push 
