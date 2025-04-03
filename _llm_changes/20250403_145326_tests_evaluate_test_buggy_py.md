@@ -1,3 +1,13 @@
+---
+layout: llm_change
+title: "Generated Tests for buggy.py"
+date: 2025-04-03T14:53:26.108787
+file: "tests/evaluate/test_buggy.py"
+change_type: "Test Generation"
+source_file: "evaluate/buggy.py"
+consolidated: true
+---
+```python
 import pytest
 from evaluate.buggy import (
     add_numbers,
@@ -68,3 +78,4 @@ def test_concatenate_strings():
 def test_list_index_error():
     # The function should always return the first element of the list [1, 2, 3], which is 1.
     assert list_index_error() == 1
+```
