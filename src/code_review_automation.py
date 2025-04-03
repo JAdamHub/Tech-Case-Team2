@@ -40,13 +40,14 @@ def review_code_with_ai(file_path, content):
         
         # Create a prompt based on file type
         prompt = f"""
-        Please review the following code and provide constructive feedback.
+              Please review the following code and provide constructive feedback.
         Focus on:
-        1. Code quality and best practices
-        2. Potential bugs or edge cases
-        3. Performance issues
-        4. Security concerns
-        5. Style and consistency
+        1. Make sure that the respond is a python code.
+        2. Code quality and best practices
+        3. Potential bugs or edge cases
+        4. Performance issues
+        5. Security concerns
+        6. Style and consistency
         
         Make sure that in the review add comments on each line of code. 
         For example:
@@ -61,8 +62,7 @@ def review_code_with_ai(file_path, content):
         For each issue, provide:
         - The line number or code section
         - What the issue is
-        - How to fix it
-        
+        - How to fix it        
         Here's the code from {normalized_path}:
         ```{file_ext}
         {content[:4000]}  # Limit content size
