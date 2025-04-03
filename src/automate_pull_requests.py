@@ -67,15 +67,6 @@ def create_pull_request():
         load_dotenv()
         # Get GitHub token from environment variables
         github_token = os.getenv("GITHUB_TOKEN")
-        if not github_token:
-            print("GITHUB_TOKEN environment variable not set.")
-            return
-        
-        # Get repository details
-        repo_name = os.getenv("GITHUB_REPOSITORY")
-        if not repo_name:
-            print("GITHUB_REPOSITORY environment variable not set.")
-            return
         
         # Get the git diff
         diff = get_git_diff()
@@ -88,6 +79,22 @@ def create_pull_request():
         
         # Extract PR title from the description (first line)
         pr_title = pr_description.split('\n')[0]
+        
+        # If no GitHub token is available, just print what would have been in the PR
+        if not github_token:
+            print("GITHUB_TOKEN environment variable not set.")
+            print("\nHere's the PR description that would be generated:")
+            print(f"Title: {pr_title}")
+            print("\nDescription:")
+            print(pr_description)
+            print("\nTo create an actual PR, set the GITHUB_TOKEN environment variable.")
+            return
+            
+        # Get repository details
+        repo_name = os.getenv("GITHUB_REPOSITORY")
+        if not repo_name:
+            print("GITHUB_REPOSITORY environment variable not set.")
+            return
         
         # Create GitHub instance
         g = Github(github_token)
