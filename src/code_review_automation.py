@@ -4,6 +4,7 @@ import openai
 from dotenv import load_dotenv
 from github import Github
 import subprocess
+from datetime import datetime
 
 # Define the path for the file list
 FILES_TO_PROCESS_PATH = "files_to_process.txt"
@@ -118,6 +119,45 @@ def post_review_comments(repo_name, pr_number, file_path, review_comments):
         print(f"Error posting review comments: {e}")
         return False
 
+def save_review_to_file(file_path, review_comments, content):
+    """Save review comments to a Python file in the changes/reviews directory"""
+    try:
+        # Create the reviews directory if it doesn't exist
+        reviews_dir = os.path.normpath('changes/reviews')
+        os.makedirs(reviews_dir, exist_ok=True)
+        
+        # Create a filename based on the original file path
+        file_name = os.path.basename(file_path)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        review_file = os.path.join(reviews_dir, f"{timestamp}_{file_name}")
+        
+        # Format the review as a Python file with proper comments
+        formatted_review = f'''"""
+Review for: {file_path}
+Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+"""
+
+# Review Comments:
+"""
+{review_comments}
+"""
+
+# Original code with review comments:
+"""
+{content}
+"""
+'''
+        
+        # Write the review to the file
+        with open(review_file, 'w') as f:
+            f.write(formatted_review)
+            
+        print(f"Saved review to {review_file}")
+        return True
+    except Exception as e:
+        print(f"Error saving review for {file_path}: {e}")
+        return False
+
 def automate_code_review():
     """Automate code review process for files specified in files_to_process.txt"""
     print('Automating code review process...')
@@ -132,11 +172,6 @@ def automate_code_review():
     for file_path in files_to_review:
         print(f"\nReviewing {file_path}...")
         
-        # Check if the file exists before trying to open it
-        if not os.path.exists(file_path):
-            print(f"Error: File {file_path} specified in list does not exist. Skipping.")
-            continue
-            
         try:
             # Read the file content
             with open(file_path, 'r') as f:
@@ -144,6 +179,9 @@ def automate_code_review():
             
             # Use AI to generate review comments
             review_comments = review_code_with_ai(file_path, content)
+            
+            # Save the review to a file
+            save_review_to_file(file_path, review_comments, content)
             
             # In GitHub Actions context, post comments to PR
             if os.getenv("GITHUB_ACTIONS") == "true":
