@@ -132,9 +132,7 @@ def generate_test_file_with_ai(file_path, test_requirements):
                 {"role": "system", "content": "You are a helpful assistant that generates Python test code."},
                 {"role": "user", "content": prompt}
             ],
-            max_completion_tokens=2048,
-            temperature=0.2,
-            top_p=0.95,
+            max_completion_tokens=2048
         )
         
         # Updated response handling
