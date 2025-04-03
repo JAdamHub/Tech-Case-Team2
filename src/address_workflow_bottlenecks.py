@@ -15,35 +15,35 @@ import importlib.util
 
 LLM_CHANGES_DIR = "_llm_changes" # Consistent directory name
 
+# Define the path for the file list
+FILES_TO_PROCESS_PATH = "files_to_process.txt"
+
 # Dictionary to track the latest report for each file
 file_report_map = {}
 
-def get_project_files():
-    """Get all Python files in the evaluate directory, excluding test files"""
+def get_files_to_process():
+    """Reads the list of files to process from the specified file."""
+    if not os.path.exists(FILES_TO_PROCESS_PATH):
+        print(f"Warning: File list '{FILES_TO_PROCESS_PATH}' not found. No files to process.")
+        return []
     try:
-        # Use find to get all .py files in evaluate/
-        result = subprocess.run(
-            ['find', 'evaluate', '-type', 'f', '-name', '*.py'],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        all_files = result.stdout.strip().split('\n')
-        # Filter out any potential test files and ensure files exist
-        project_files = [f for f in all_files if '/test_' not in f and not os.path.basename(f).startswith('test_') and os.path.exists(f)]
-        return project_files
-    except FileNotFoundError:
-        print("Error: 'find' command not found. Ensure core utilities are available.")
-        return []
-    except subprocess.CalledProcessError as e:
-        print(f"Error finding project files: {e}")
-        return []
+        with open(FILES_TO_PROCESS_PATH, 'r') as f:
+            # Ensure we only process Python files from the list
+            files = [line.strip() for line in f if line.strip() and line.strip().endswith('.py')]
+        if not files:
+            print(f"File list '{FILES_TO_PROCESS_PATH}' is empty or contains no Python files. No files to process.")
+        return files
     except Exception as e:
-        print(f"An unexpected error occurred while getting project files: {e}")
+        print(f"Error reading file list from {FILES_TO_PROCESS_PATH}: {e}")
         return []
 
 def extract_test_requirements(file_path):
     """Extract test requirements (function definitions) from a file"""
+    # Add check for file existence
+    if not os.path.exists(file_path):
+        print(f"Error: File {file_path} not found. Cannot extract requirements.")
+        return []
+        
     try:
         with open(file_path, 'r') as f:
             content = f.read()
@@ -73,6 +73,7 @@ def extract_test_requirements(file_path):
             
         return test_requirements
     except FileNotFoundError:
+         # Should be caught above, but keep for robustness
          print(f"Error: File not found at {file_path}")
          return []
     except Exception as e:
@@ -86,6 +87,11 @@ def generate_test_file_with_ai(file_path, test_requirements):
             return None
             
         original_content = None
+        # Add check for file existence before reading
+        if not os.path.exists(file_path):
+            print(f"Error: Source file {file_path} not found. Cannot generate tests.")
+            return None
+            
         with open(file_path, 'r') as f:
             original_content = f.read()
             
@@ -165,6 +171,7 @@ def generate_test_file_with_ai(file_path, test_requirements):
         print(f"Error interacting with OpenAI for test generation: {e}")
         return None
     except FileNotFoundError:
+         # Should be caught above, but keep for robustness
          print(f"Error: Source file not found at {file_path}")
          return None
     except Exception as e:
@@ -345,23 +352,29 @@ def analyze_workflow_bottlenecks():
     return "Analysis placeholder."
 
 def address_workflow_bottlenecks():
-    """Address workflow bottlenecks, focusing on automated test generation"""
+    """Address workflow bottlenecks, focusing on automated test generation for files in files_to_process.txt"""
     print('--- Addressing Workflow Bottlenecks (Automated Test Generation) ---')
     
-    # Get Python files from evaluate/
-    project_files = get_project_files()
-    if not project_files:
-        print("No Python source files found in evaluate/ to generate tests for.")
+    # Get Python files from the list file
+    source_files_to_process = get_files_to_process()
+    
+    if not source_files_to_process:
+        print("No Python source files specified in list to generate tests for.")
         return
 
     generated_tests_count = 0
     passed_tests_count = 0
     failed_generation_count = 0
     
-    # Process each source file to generate tests
-    for file_path in project_files:
+    # Process each source file from the list to generate tests
+    for file_path in source_files_to_process:
         print(f"\n>>> Processing source file: {file_path}")
         
+        # Add check for file existence early (though also checked in extract_test_requirements)
+        if not os.path.exists(file_path):
+            print(f"Skipping non-existent source file specified in list: {file_path}")
+            continue
+            
         # Extract test requirements (functions)
         test_requirements = extract_test_requirements(file_path)
         
@@ -391,7 +404,7 @@ def address_workflow_bottlenecks():
             print("No testable functions found or error extracting requirements.")
             
     print("\n--- Test Generation Summary ---")
-    print(f"Processed {len(project_files)} source files.")
+    print(f"Processed {len(source_files_to_process)} source files from the list.") # Updated count source
     print(f"Generated {generated_tests_count} test files.")
     print(f"Generated tests passed for {passed_tests_count} files.")
     if failed_generation_count > 0:

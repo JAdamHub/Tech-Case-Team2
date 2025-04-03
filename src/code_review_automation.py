@@ -5,78 +5,23 @@ from dotenv import load_dotenv
 from github import Github
 import subprocess
 
-def get_modified_python_files():
-    """Get a list of modified Python files using git"""
-    try:
-        result = subprocess.run(
-            ['git', 'diff', '--name-only', 'HEAD'], 
-            capture_output=True, 
-            text=True
-        )
-        files = result.stdout.strip().split('\n')
-        # Normalize paths and ensure they exist
-        normalized_files = []
-        for f in files:
-            if f.endswith('.py'):
-                # Normalize the path to handle different separators
-                normalized_path = os.path.normpath(f)
-                if os.path.exists(normalized_path):
-                    normalized_files.append(normalized_path)
-                else:
-                    print(f"Warning: File {normalized_path} does not exist, skipping")
-        return normalized_files
-    except Exception as e:
-        print(f"Error getting modified files: {e}")
-        return []
-    
+# Define the path for the file list
+FILES_TO_PROCESS_PATH = "files_to_process.txt"
 
-def get_locally_modified_files():
-    """Get locally modified files for demonstration purposes"""
-    try:
-        # Get the list of modified files
-        files_result = subprocess.run(
-            ['git', 'diff', '--name-only', 'HEAD'], 
-            capture_output=True, 
-            text=True
-        )
-        modified_files = files_result.stdout.strip().split('\n')
-        
-        files_with_diff = []
-        for file_path in modified_files:
-            # Normalize the path
-            normalized_path = os.path.normpath(file_path)
-            
-            # Skip non-existent or non-code files
-            if not os.path.exists(normalized_path) or not is_code_file(normalized_path):
-                print(f"Warning: Skipping {normalized_path} - file does not exist or is not a code file")
-                continue
-                
-            # Get the diff for each file
-            diff_result = subprocess.run(
-                ['git', 'diff', 'HEAD', '--', normalized_path],
-                capture_output=True,
-                text=True
-            )
-            files_with_diff.append((normalized_path, diff_result.stdout))
-            
-        # If no modified files found, use example_code.py for demonstration
-        if not files_with_diff:
-            example_file = os.path.normpath('src/example_code.py')
-            if os.path.exists(example_file):
-                with open(example_file, 'r') as f:
-                    content = f.read()
-                files_with_diff.append((example_file, content))
-                
-        return files_with_diff
-        
-    except Exception as e:
-        print(f"Error getting local changes: {e}")
+def get_files_to_process():
+    """Reads the list of files to process from the specified file."""
+    if not os.path.exists(FILES_TO_PROCESS_PATH):
+        print(f"Warning: File list '{FILES_TO_PROCESS_PATH}' not found. No files to process.")
         return []
-
-def is_code_file(file_path):
-    """Check if a file is a code file based on its extension"""
-    code_extensions = ['.py', '.js', '.ts', '.java', '.c', '.cpp', '.cs', '.go', '.rb', '.php']
-    return any(file_path.endswith(ext) for ext in code_extensions)
+    try:
+        with open(FILES_TO_PROCESS_PATH, 'r') as f:
+            files = [line.strip() for line in f if line.strip()]
+        if not files:
+            print(f"File list '{FILES_TO_PROCESS_PATH}' is empty. No files to process.")
+        return files
+    except Exception as e:
+        print(f"Error reading file list from {FILES_TO_PROCESS_PATH}: {e}")
+        return []
 
 def review_code_with_ai(file_path, content):
     """Generate code review comments using AI"""
@@ -174,19 +119,24 @@ def post_review_comments(repo_name, pr_number, file_path, review_comments):
         return False
 
 def automate_code_review():
-    """Automate code review process"""
+    """Automate code review process for files specified in files_to_process.txt"""
     print('Automating code review process...')
     
-    # Get files to review
-    files = get_modified_python_files()
+    # Get files to review from the list file
+    files_to_review = get_files_to_process()
     
-    if not files:
-        print("No files to review.")
+    if not files_to_review:
+        print("No files specified for review.")
         return
     
-    for file_path in files:
+    for file_path in files_to_review:
         print(f"\nReviewing {file_path}...")
         
+        # Check if the file exists before trying to open it
+        if not os.path.exists(file_path):
+            print(f"Error: File {file_path} specified in list does not exist. Skipping.")
+            continue
+            
         try:
             # Read the file content
             with open(file_path, 'r') as f:
@@ -200,7 +150,9 @@ def automate_code_review():
                 repo_name = os.getenv("GITHUB_REPOSITORY")
                 pr_number = os.getenv("PR_NUMBER")
                 if repo_name and pr_number:
-                    posted = post_review_comments(repo_name, pr_number, file_path, review_comments)
+                    # Make sure file_path is relative for GitHub API
+                    relative_file_path = os.path.relpath(file_path, os.getcwd())
+                    posted = post_review_comments(repo_name, pr_number, relative_file_path, review_comments)
                     if posted:
                         print(f"Posted review comments for {file_path}.")
                     else:

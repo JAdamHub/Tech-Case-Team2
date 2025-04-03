@@ -37,31 +37,52 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # --- Run LLM Tasks that Modify Code/Generate Reports ---
-      - name: Automating Pull Request (automate_pull_requests.py.py)
+      # --- STEP 1: Identify changed files and create list --- 
+      - name: Identify Changed Files (automate_pull_requests.py - Part 1)
+        # This run creates files_to_process.txt
         run: python src/automate_pull_requests.py
 
+      # --- STEP 2: Run Analysis and Modification Scripts on identified files --- 
+      - name: Run Code Review Automation (code_review_automation.py)
+        # Reads files_to_process.txt
+        run: python src/code_review_automation.py
+        
       - name: Run Bug Fix Suggestions (Analysis Only - bug_fix_suggestions.py)
+        # Reads files_to_process.txt
         run: python src/bug_fix_suggestions.py
 
       - name: Run Admin Tasks Automation (Linting Fixes & Report) (automate_admin_tasks.py)
         id: admin_tasks
+        # Reads files_to_process.txt, potentially modifies files
         run: python src/automate_admin_tasks.py
 
       - name: Run Workflow Bottleneck Mitigation (Test Generation & Report) (address_workflow_bottlenecks.py)
         id: bottlenecks
+        # Reads files_to_process.txt, potentially creates/modifies files
         run: python src/address_workflow_bottlenecks.py
-        
-      - name: Run Code Review Automation (code_review_automation.py)
-        run: python src/code_review_automation.py
 
-      # --- Consolidate Reports ---
+      # --- STEP 3: Consolidate Reports --- (Moved before commit)
       - name: Create Summary Index for Reports
         run: |
-          mkdir -p utils
-          python utils/consolidate_reports.py
+          # Ensure the directory exists before running the script
+          mkdir -p _llm_changes
+          # Check if the consolidation script exists, run if it does
+          if [ -f utils/consolidate_reports.py ]; then
+            python utils/consolidate_reports.py
+          else
+            echo "Warning: utils/consolidate_reports.py not found, skipping report consolidation."
+          fi
+          # Ensure index.md exists even if script failed/didn't run
+          if [ ! -f _llm_changes/index.md ]; then
+             echo "---" > _llm_changes/index.md
+             echo "layout: page" >> _llm_changes/index.md
+             echo "title: LLM-generated Changes" >> _llm_changes/index.md
+             echo "---" >> _llm_changes/index.md
+             echo "# LLM-generated Changes" >> _llm_changes/index.md
+             echo "No reports consolidated yet." >> _llm_changes/index.md
+          fi
 
-      # --- Commit potential changes made by scripts (lint fixes, generated tests) ---
+      # --- STEP 4: Commit potential changes made by scripts --- 
       - name: Commit LLM Changes
         run: |
           # Configure Git with GitHub Actions user
@@ -69,36 +90,36 @@ jobs:
           git config --local user.name "github-actions[bot]"
           
           # Debug: List what was generated
-          echo "Checking for generated files:"
-          ls -la _llm_changes/ || echo "_llm_changes directory not found or empty"
+          echo "Checking for generated files before commit:"
+          ls -la _llm_changes/ || echo "_llm_changes directory not found or empty before commit"
+          echo "Checking for test files:"
+          ls -la tests/ || echo "tests directory not found or empty"
+          echo "Checking for modified source files:"
+          git status --porcelain evaluate/
           
           # Make sure _llm_changes directory exists
           mkdir -p _llm_changes
           
-          # Touch a file to ensure the directory is not empty
-          echo "LLM Changes from GitHub Action run at $(date)" > _llm_changes/action_run_marker.md
-          
           # Add generated reports and any modified/created files
-          # Using -A to stage all changes (new, modified, deleted)
-          git add -A
+          # Add tests, reports, modified evaluate files, and the processing list file
+          git add tests/ _llm_changes/ evaluate/ files_to_process.txt
           
-          # Debug: Check git status
-          echo "Git status:"
+          # Debug: Check git status after add
+          echo "Git status after add:"
           git status
           
           # Commit and push if changes are detected
-          echo "Checking for changes..."
-          # Use the simpler check and push logic (may fail due to auth issues seen previously)
-          git diff --quiet && git diff --staged --quiet || (
-            echo "Changes detected. Committing and pushing..." &&
+          echo "Checking for staged changes..."
+          if ! git diff --staged --quiet; then
+            echo "Changes detected. Committing and pushing..."
             git commit -m "chore: Apply LLM fixes and generated reports [skip ci]
 
             - Applied automated code fixes (e.g., linting)
             - Generated new test files
-            - Created LLM change reports" && 
-            # Explicitly set remote URL with token for authentication (NECESSARY due to previous failures)
-            git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} && 
-            # Determine the correct branch reference based on event type and push
+            - Created LLM change reports" && \
+            # Explicitly set remote URL with token for authentication
+            git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} && \
+            # Determine the correct branch reference and push
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then 
               echo "Pushing changes to PR branch: ${{ github.head_ref }}"; 
               git push origin HEAD:${{ github.head_ref }}; 
@@ -108,17 +129,16 @@ jobs:
             fi || {
               # Handle potential push errors
               echo "Error: Failed to push changes."
-              echo "Event type: ${{ github.event_name }}"
-              echo "Target branch/ref: ${{ github.head_ref || github.ref_name }}"
               echo "This may be due to branch protection rules or token permissions."
-              exit 1
+              exit 1 # Exit with error if push fails
             }
-          ) || echo "No changes detected to commit."
+          else
+              echo "No changes detected to commit."
+          fi
           
-        # Continue even if commit/push fails (e.g., no changes, protected branch)
-        continue-on-error: ${{ github.event_name == 'pull_request' }}  # Only allow errors to be ignored for PRs, not for pushes
+        # Do not continue on error if commit/push fails, unless it's a PR and we explicitly allow it (removed continue-on-error)
 
-      # --- Setup and Build Jekyll Site ---
+      # --- STEP 5: Setup and Build Jekyll Site --- 
       - name: Setup Ruby and Jekyll
         uses: ruby/setup-ruby@v1
         with:
@@ -139,18 +159,24 @@ jobs:
         run: |
           echo "Checking for _llm_changes content in build:"
           ls -la _site/ || echo "No _site directory found!"
-          echo "Checking for changes directory in Jekyll build:"
-          ls -la _site/changes/ || echo "Changes directory not found in _site!"
+          # Check for specific report files or index if changes dir isn't directly mapped
+          echo "Checking for index file in Jekyll build changes directory (if exists):"
+          ls -la _site/${{ LLM_CHANGES_DIR }}/ || echo "LLM changes directory ('_llm_changes') not found in _site!"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         # Automatically uploads the '_site' directory
 
-      # --- Deploy to GitHub Pages ---
+      # --- STEP 6: Deploy to GitHub Pages --- 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
         # This action handles the deployment to the gh-pages branch
 
-      - name: Create Pull Request
+      # --- STEP 7: Create Pull Request (Now runs last) --- 
+      - name: Create Pull Request (automate_pull_requests.py - Part 2)
+        # This run uses the (potentially updated) files to generate description and create PR
+        # Only run if on a push event to a branch (not main/master, and not a tag)
+        # or specifically on pull_request events if desired (adjust condition needed)
+        if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
         run: python src/automate_pull_requests.py

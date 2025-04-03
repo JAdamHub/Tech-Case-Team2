@@ -12,42 +12,25 @@ import json
 
 LLM_CHANGES_DIR = "_llm_changes"
 
+# Define the path for the file list
+FILES_TO_PROCESS_PATH = "files_to_process.txt"
+
 # Dictionary to track the latest report for each file
 file_report_map = {}
 
-def get_modified_python_files():
-    """Get a list of modified Python files using git"""
-    try:
-        result = subprocess.run(
-            ['git', 'diff', '--name-only', 'HEAD'], 
-            capture_output=True, 
-            text=True,
-            check=True
-        )
-        files = result.stdout.strip().split('\n')
-        existing_files = [f for f in files if f.endswith('.py') and os.path.exists(f)]
-        return existing_files
-    except FileNotFoundError:
-        print("Error: 'git' command not found. Make sure git is installed and in your PATH.")
+def get_files_to_process():
+    """Reads the list of files to process from the specified file."""
+    if not os.path.exists(FILES_TO_PROCESS_PATH):
+        print(f"Warning: File list '{FILES_TO_PROCESS_PATH}' not found. No files to process.")
         return []
-    except subprocess.CalledProcessError as e:
-        if "fatal: ambiguous argument 'HEAD'" in e.stderr:
-             print("No commits found yet (new repository?). Cannot get diff from HEAD.")
-             try:
-                 evaluate_files = subprocess.run(
-                     ['find', 'evaluate', '-name', '*.py'],
-                     capture_output=True, text=True, check=True
-                 )
-                 return evaluate_files.stdout.strip().split('\n')
-             except Exception as find_e:
-                 print(f"Error finding files in evaluate/: {find_e}")
-                 return []
-        else:
-            print(f"Error getting modified files: {e}")
-            print(f"Git stderr: {e.stderr}")
-            return []
+    try:
+        with open(FILES_TO_PROCESS_PATH, 'r') as f:
+            files = [line.strip() for line in f if line.strip()]
+        if not files:
+            print(f"File list '{FILES_TO_PROCESS_PATH}' is empty. No files to process.")
+        return files
     except Exception as e:
-        print(f"An unexpected error occurred while getting modified files: {e}")
+        print(f"Error reading file list from {FILES_TO_PROCESS_PATH}: {e}")
         return []
 
 def run_pylint(file_path):
@@ -94,6 +77,10 @@ def fix_linting_issues_with_ai(file_path, issues):
         return None, None
     
     original_content = None
+    if not os.path.exists(file_path):
+        print(f"Error: File {file_path} not found. Cannot fix linting issues.")
+        return None, None
+        
     try:
         with open(file_path, 'r') as f:
             original_content = f.read()
@@ -273,6 +260,10 @@ def apply_fixes(file_path, fixed_code):
 
 def verify_fixes(file_path):
     """Verify that the fixes resolved the linting issues"""
+    if not os.path.exists(file_path):
+        print(f"Error: File {file_path} not found. Cannot verify fixes.")
+        return False
+        
     import time
     time.sleep(0.1)
     new_output = run_pylint(file_path)
@@ -281,26 +272,19 @@ def verify_fixes(file_path):
     return len(new_issues) == 0
 
 def automate_admin_tasks():
-    """Automate administrative tasks (linting)"""
+    """Automate administrative tasks (linting) for files in files_to_process.txt"""
     print('Automating administrative tasks (Linting Fixes)...')
 
-    # Get Python files from evaluate/
-    files_to_check = get_modified_python_files()
+    # Get Python files from the list file
+    files_to_check = get_files_to_process()
+    
     if not files_to_check:
-        print("No modified Python files found via git diff. Checking evaluate/ directory.")
-        evaluate_files = subprocess.run(
-            ['find', 'evaluate', '-name', '*.py'],
-            capture_output=True, text=True, check=True
-        )
-        files_to_check = evaluate_files.stdout.strip().split('\n')
-        
-        if not files_to_check:
-            print("No Python files found in evaluate/ directory.")
-            return
+        print("No files specified for linting checks.")
+        return
 
     for file_path in files_to_check:
         if not os.path.exists(file_path):
-             print(f"Skipping non-existent file: {file_path}")
+             print(f"Skipping non-existent file specified in list: {file_path}")
              continue
 
         print(f"\n--- Checking {file_path} for linting issues ---")

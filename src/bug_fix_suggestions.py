@@ -5,24 +5,34 @@ import openai
 from dotenv import load_dotenv
 import subprocess
 
-def get_modified_python_files():
-    """Get a list of modified Python files using git"""
+# Define the path for the file list
+FILES_TO_PROCESS_PATH = "files_to_process.txt"
+
+def get_files_to_process():
+    """Reads the list of files to process from the specified file."""
+    if not os.path.exists(FILES_TO_PROCESS_PATH):
+        print(f"Warning: File list '{FILES_TO_PROCESS_PATH}' not found. No files to process.")
+        return []
     try:
-        result = subprocess.run(
-            ['git', 'diff', '--name-only', 'HEAD'], 
-            capture_output=True, 
-            text=True
-        )
-        files = result.stdout.strip().split('\n')
-        return [f for f in files if f.endswith('.py')]
+        with open(FILES_TO_PROCESS_PATH, 'r') as f:
+            files = [line.strip() for line in f if line.strip()]
+        if not files:
+            print(f"File list '{FILES_TO_PROCESS_PATH}' is empty. No files to process.")
+        return files
     except Exception as e:
-        print(f"Error getting modified files: {e}")
+        print(f"Error reading file list from {FILES_TO_PROCESS_PATH}: {e}")
         return []
 
 def check_for_common_bugs(file_path):
     """Check for common bugs in a Python file using AST parsing"""
     bugs = []
+    content = ""
     
+    # Add check for file existence
+    if not os.path.exists(file_path):
+        print(f"Error: File {file_path} not found. Cannot check for bugs.")
+        return bugs, content
+        
     try:
         with open(file_path, 'r') as file:
             content = file.read()
@@ -80,7 +90,7 @@ def check_for_common_bugs(file_path):
         
     except Exception as e:
         print(f"Error analyzing {file_path}: {e}")
-        return [], ""
+        return [], "" # Return empty content on error
 
 def get_ai_suggestions(file_content, bugs):
     """Get AI-generated suggestions for fixing bugs"""
@@ -121,25 +131,19 @@ def get_ai_suggestions(file_content, bugs):
         return "Could not generate AI suggestions."
 
 def suggest_bug_fixes():
-    """Analyze code changes and suggest bug fixes"""
+    """Analyze code changes and suggest bug fixes for files in files_to_process.txt"""
     print('Analyzing code changes and suggesting bug fixes...')
     
-    # Get modified Python files
-    files = get_modified_python_files()
-    if not files:
-        # If no modified files found, check evaluate directory
-        try:
-            evaluate_files = subprocess.run(
-                ['find', 'evaluate', '-name', '*.py'],
-                capture_output=True, text=True, check=True
-            )
-            files = evaluate_files.stdout.strip().split('\n')
-        except Exception as e:
-            print(f"Error finding files in evaluate/: {e}")
-            return
+    # Get files to analyze from the list file
+    files_to_analyze = get_files_to_process()
     
-    for file_path in files:
+    if not files_to_analyze:
+        print("No files specified for bug analysis.")
+        return
+    
+    for file_path in files_to_analyze:
         print(f"\nAnalyzing {file_path}...")
+        # check_for_common_bugs now handles non-existent file check
         bugs, content = check_for_common_bugs(file_path)
         
         if bugs:
@@ -148,11 +152,16 @@ def suggest_bug_fixes():
                 print(f"- {bug['type']}: {bug.get('suggestion', '')}")
             
             # Get AI suggestions for fixing the bugs
-            suggestions = get_ai_suggestions(content, bugs)
-            print("\nAI-suggested fixes:")
-            print(suggestions)
-        else:
+            # Only get suggestions if we actually read content
+            if content:
+                suggestions = get_ai_suggestions(content, bugs)
+                print("\nAI-suggested fixes:")
+                print(suggestions)
+            else:
+                print("Could not get AI suggestions because file content could not be read.")
+        elif content: # Only print "No bugs" if we actually analyzed the file
             print("No common bugs found.")
+        # If content is empty and no bugs, it means the file couldn't be read or parsed earlier
 
 if __name__ == '__main__':
     suggest_bug_fixes()
