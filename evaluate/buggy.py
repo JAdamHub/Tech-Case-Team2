@@ -1,4 +1,3 @@
-```python
 """Module for arithmetic and string operations with sample functions."""
 
 
@@ -30,4 +29,4 @@ def concatenate_strings(s1, s2):
 def list_index_error():
     """Return a valid element from the list to avoid IndexError."""
     local_list = [1, 2, 3]
-    return
+    return local_list[0]
