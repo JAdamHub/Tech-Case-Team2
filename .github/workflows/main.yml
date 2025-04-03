@@ -81,6 +81,17 @@ jobs:
              echo "# LLM-generated Changes" >> _llm_changes/index.md
              echo "No reports consolidated yet." >> _llm_changes/index.md
           fi
+          
+      # --- STEP 3.5: Remove files_to_process.txt before commit ---
+      - name: Remove Temporary Files
+        run: |
+          # Remove temporary file to avoid committing it
+          if [ -f files_to_process.txt ]; then
+            echo "Removing temporary file files_to_process.txt"
+            rm files_to_process.txt
+          else
+            echo "No files_to_process.txt found to remove"
+          fi
 
       # --- STEP 4: Commit potential changes made by scripts --- 
       - name: Commit LLM Changes
@@ -102,7 +113,7 @@ jobs:
           
           # Add generated reports and any modified/created files
           # Add tests, reports, modified evaluate files, and the processing list file
-          git add tests/ _llm_changes/ evaluate/ files_to_process.txt
+          git add tests/ _llm_changes/ evaluate/
           
           # Debug: Check git status after add
           echo "Git status after add:"
