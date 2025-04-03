@@ -557,10 +557,13 @@ def generate_combined_report(file_results):
         os.makedirs(LLM_CHANGES_DIR)
         print(f"Created directory: {LLM_CHANGES_DIR}")
     
+    # Extract title from filename (e.g., "20240101_120000_combined_report")
+    report_title = os.path.splitext(os.path.basename(report_filename))[0]
+    
     # Jekyll Front Matter
     front_matter = f"""---
 layout: llm_change
-title: "Combined Analysis Report"
+title: "{report_title}"
 date: {timestamp.isoformat()}
 change_type: "Combined Analysis"
 consolidated: true
@@ -568,7 +571,7 @@ consolidated: true
 """
     
     # Report header
-    report_content = f"""# Combined Analysis Report
+    report_content = f"""# {report_title}
 Generated on: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}
 
 This report combines code review, bug fix suggestions, linting fixes, and test generation for the analyzed files.
