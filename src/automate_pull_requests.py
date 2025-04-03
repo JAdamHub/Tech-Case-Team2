@@ -12,6 +12,7 @@ FILES_TO_PROCESS_PATH = "files_to_process.txt"
 def get_changed_evaluate_files():
     """Get the list of changed/new Python files in the evaluate directory.
     Compares HEAD~1..HEAD if on main branch, otherwise compares against base branch.
+    Also detects untracked (new) files in the evaluate directory.
     """
     try:
         ref_name = os.getenv('GITHUB_REF_NAME')
@@ -24,6 +25,22 @@ def get_changed_evaluate_files():
             print(f"Python files in evaluate directory:\n{eval_files.stdout}")
         except Exception as e:
             print(f"Could not list files in evaluate directory: {e}")
+
+        # Initialize list to store all changed and new files
+        all_changed_files = []
+        
+        # Check for untracked (new) files specifically
+        try:
+            print("Checking for untracked (new) files in evaluate directory...")
+            untracked_cmd = ['git', 'ls-files', '--others', '--exclude-standard', 'evaluate']
+            untracked_result = subprocess.run(untracked_cmd, capture_output=True, text=True, check=True)
+            untracked_files = [f for f in untracked_result.stdout.strip().split('\n') if f and f.endswith('.py')]
+            
+            if untracked_files:
+                print(f"Found untracked Python files in evaluate/: {', '.join(untracked_files)}")
+                all_changed_files.extend(untracked_files)
+        except Exception as untracked_err:
+            print(f"Warning: Could not check for untracked files: {untracked_err}")
 
         comparison_target = ""
         diff_command_base = ['git', 'diff', '--name-only', '--diff-filter=ARM']
@@ -88,7 +105,8 @@ def get_changed_evaluate_files():
             evaluate_py_files = [f for f in all_changed if f.startswith('evaluate/') and f.endswith('.py')]
             if evaluate_py_files:
                 print(f"Found Python files in evaluate using alternative method: {evaluate_py_files}")
-                return evaluate_py_files
+                all_changed_files.extend([f for f in evaluate_py_files if f not in all_changed_files])
+                return all_changed_files
         except Exception as alt_err:
             print(f"Alternative detection failed: {alt_err}")
 
@@ -111,12 +129,15 @@ def get_changed_evaluate_files():
         # Don't filter for existence - file might be in git but not in working tree
         changed_files = [f for f in files if f] 
         
-        if not changed_files:
+        # Add tracked changed files if not already in list
+        all_changed_files.extend([f for f in changed_files if f not in all_changed_files])
+        
+        if not all_changed_files:
             print(f"No changed Python files detected in evaluate/ based on the comparison.")
         else:
-            print(f"Detected changed Python files in evaluate/: {', '.join(changed_files)}")
+            print(f"Detected changed Python files in evaluate/: {', '.join(all_changed_files)}")
             
-        return changed_files
+        return all_changed_files
         
     except subprocess.CalledProcessError as e:
         # Handle cases like insufficient fetch depth for HEAD~1 or other git errors
@@ -132,6 +153,35 @@ def get_changed_evaluate_files():
                                          capture_output=True, text=True, check=True)
                  all_py_files = result.stdout.strip().split('\n')
                  print(f"Found {len(all_py_files)} Python files in evaluate/")
+                 
+                 # Try to isolate the subset of files that are actually modified,
+                 # or fall back to all files as a last resort
+                 try:
+                     # Check for untracked (new) files specifically
+                     untracked_cmd = ['git', 'ls-files', '--others', '--exclude-standard', 'evaluate']
+                     untracked_result = subprocess.run(untracked_cmd, capture_output=True, text=True, check=True)
+                     untracked_files = [f for f in untracked_result.stdout.strip().split('\n') if f and f.endswith('.py')]
+                     
+                     # Check for modified tracked files
+                     modified_cmd = ['git', 'diff', '--name-only', '--diff-filter=AM']
+                     modified_result = subprocess.run(modified_cmd, capture_output=True, text=True, check=True)
+                     modified_files = [f for f in modified_result.stdout.strip().split('\n') if f and f.startswith('evaluate/') and f.endswith('.py')]
+                     
+                     # Combine both lists
+                     changed_files = []
+                     changed_files.extend(untracked_files)
+                     changed_files.extend([f for f in modified_files if f not in changed_files])
+                     
+                     if changed_files:
+                         print(f"Detected {len(changed_files)} changed files in evaluate/ during fallback.")
+                         return changed_files
+                     
+                     # If we couldn't detect changes, fall back to all Python files
+                     print("Could not isolate changed files. Processing all Python files in evaluate/ as fallback.")
+                 except Exception as fallback_err:
+                     print(f"Error during fallback change detection: {fallback_err}")
+                     print("Processing all Python files in evaluate/ as fallback.")
+                 
                  return [f for f in all_py_files if f]
              except Exception as find_err:
                  print(f"Failed to list Python files: {find_err}")
