@@ -161,7 +161,7 @@ jobs:
           ls -la _site/ || echo "No _site directory found!"
           # Check for specific report files or index if changes dir isn't directly mapped
           echo "Checking for index file in Jekyll build changes directory (if exists):"
-          ls -la _site/${{ LLM_CHANGES_DIR }}/ || echo "LLM changes directory ('_llm_changes') not found in _site!"
+          ls -la _site/_llm_changes/ || echo "LLM changes directory ('_llm_changes') not found in _site!"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
