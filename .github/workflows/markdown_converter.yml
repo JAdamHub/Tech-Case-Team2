@@ -11,6 +11,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -31,10 +33,20 @@ jobs:
       run: |
         python converter_markdown/md_to_html_converter.py
     
-    - name: Commit and push changes
+    - name: Configure Git
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+    
+    - name: Pull latest changes
+      run: |
+        git pull --rebase origin main
+    
+    - name: Add and commit changes
+      run: |
         git add converter_markdown/output_folder_markdown/
         git commit -m "Auto-generated HTML files from markdown" || echo "No changes to commit"
-        git push 
+    
+    - name: Push changes
+      run: |
+        git push origin main 
