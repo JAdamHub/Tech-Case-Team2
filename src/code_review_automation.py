@@ -2,7 +2,6 @@ import os
 import re
 import openai
 from dotenv import load_dotenv
-from github import Github
 import subprocess
 from datetime import datetime
 
@@ -41,7 +40,7 @@ def review_code_with_ai(file_path, content):
         
         # Create a prompt based on file type
         prompt = f"""
-              Please review the following code and provide constructive feedback.
+              Please review the following code, add comments and provide constructive feedback.
         Focus on:
         1. Make sure that the respond is a python code.
         2. Code quality and best practices
@@ -97,21 +96,19 @@ def save_review_to_file(file_path, review_comments, content):
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         review_file = os.path.join(reviews_dir, f"{timestamp}_{file_name}")
         
-        # Format the review as a Python file with proper comments
-        formatted_review = f'''"""
-Review for: {file_path}
-Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-"""
+        # Format the review as a Python file with comments
+        formatted_review = f'''# Review for: {file_path}
+# Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 # Review Comments:
-"""
+[
 {review_comments}
-"""
+]
 
-# Original code with review comments:
-"""
+# Original code:
+[
 {content}
-"""
+]
 '''
         
         # Write the review to the file
@@ -149,19 +146,7 @@ def automate_code_review():
             # Save the review to a file
             save_review_to_file(file_path, review_comments, content)
             
-            # In GitHub Actions context, post comments to PR
-            if os.getenv("GITHUB_ACTIONS") == "true":
-                repo_name = os.getenv("GITHUB_REPOSITORY")
-                pr_number = os.getenv("PR_NUMBER")
-                if repo_name and pr_number:
-                    # Make sure file_path is relative for GitHub API
-                    relative_file_path = os.path.relpath(file_path, os.getcwd())
-                    posted = post_review_comments(repo_name, pr_number, relative_file_path, review_comments)
-                    if posted:
-                        print(f"Posted review comments for {file_path}.")
-                    else:
-                        print(f"Failed to post review comments for {file_path}.")
-            
+
             # Print review locally
             print("\nAI Code Review:")
             print(review_comments)
