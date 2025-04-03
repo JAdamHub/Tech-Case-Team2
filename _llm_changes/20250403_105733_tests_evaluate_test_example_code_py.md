@@ -1,3 +1,12 @@
+---
+layout: llm_change # Using the same layout, but could create a specific one
+title: "Generated Tests for example_code.py"
+date: 2025-04-03T10:57:33.613311
+file: "tests/evaluate/test_example_code.py" # Report is about the test file
+change_type: "Test Generation"
+source_file: "evaluate/example_code.py"
+---
+```python
 import pytest
 from evaluate.example_code import (
     add,
@@ -74,3 +83,4 @@ def test_faulty_logic():
     # Edge case: equality should follow the else branch
     result = faulty_logic(4, 4)
     assert result == 0, "For inputs (4, 4), expected faulty_logic to return 4 - 4 = 0"
+```
