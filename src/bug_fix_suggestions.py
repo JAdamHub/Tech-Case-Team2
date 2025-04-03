@@ -106,15 +106,18 @@ def get_ai_suggestions(file_content, bugs):
         """
         
         # Using OpenAI to generate suggestions
-        response = openai.Completion.create(
+        response = openai.chat.completions.create(
             model="3o-mini",
-            prompt=f"<s>[INST] {prompt} [/INST]",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that analyzes Python code and suggests bug fixes."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=1024,
             temperature=0.2,
             top_p=0.95,
         )
         
-        return response.choices[0].text
+        return response.choices[0].message.content
     except Exception as e:
         print(f"Error getting AI suggestions: {e}")
         return "Could not generate AI suggestions."

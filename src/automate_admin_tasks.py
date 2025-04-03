@@ -117,16 +117,19 @@ def fix_linting_issues_with_ai(file_path, issues):
         """
         
         # Using OpenAI to generate completion
-        response = openai.Completion.create(
+        response = openai.chat.completions.create(
             model="3o-mini",
-            prompt=f"<s>[INST] {prompt} [/INST]",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that fixes Python code linting issues."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=2048,
             temperature=0.2,
             top_p=0.95,
         )
         
         # Updated response handling
-        fixed_code_raw = response.choices[0].text
+        fixed_code_raw = response.choices[0].message.content
         
         match = re.search(r"```python\n(.*?)\n```", fixed_code_raw, re.DOTALL)
         if match:

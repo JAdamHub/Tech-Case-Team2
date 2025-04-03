@@ -126,16 +126,19 @@ def generate_test_file_with_ai(file_path, test_requirements):
         """
         
         # Using OpenAI to generate test file
-        response = openai.Completion.create(
+        response = openai.chat.completions.create(
             model="3o-mini",
-            prompt=f"<s>[INST] {prompt} [/INST]",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that generates Python test code."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=2048,
             temperature=0.2,
             top_p=0.95,
         )
         
         # Updated response handling
-        test_file_content_raw = response.choices[0].text
+        test_file_content_raw = response.choices[0].message.content
         
         # Clean up the response
         match = re.search(r"```python\n(.*?)\n```", test_file_content_raw, re.DOTALL)

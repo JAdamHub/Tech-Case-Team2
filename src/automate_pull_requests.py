@@ -38,15 +38,18 @@ def generate_pr_description(diff):
         """
         
         # Using OpenAI to generate PR description
-        response = openai.Completion.create(
+        response = openai.chat.completions.create(
             model="3o-mini",
-            prompt=f"<s>[INST] {prompt} [/INST]",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that writes detailed pull request descriptions."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=1024,
             temperature=0.7,  # Slightly higher temperature for creative PR descriptions
             top_p=0.95,
         )
         
-        return response.choices[0].text
+        return response.choices[0].message.content
     except Exception as e:
         print(f"Error generating PR description: {e}")
         return "Automated Pull Request"
