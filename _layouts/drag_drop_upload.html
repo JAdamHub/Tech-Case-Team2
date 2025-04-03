@@ -5,11 +5,24 @@ title: Document Upload
 
 <div class="upload-container">
     <h1>Document Upload</h1>
-    <p>Drag and drop your documents here or click to select files</p>
+    <p>Drag and drop your markdown (.md) files here or click to select files</p>
+    <p class="upload-info">Files will be saved to: converter_markdown/input_folder_markdown</p>
+    <p class="file-type-info">Only .md files are allowed</p>
+    
+    <div class="error-message" id="errorMessage" style="display: none;">
+        <div class="error-content">
+            <span class="error-icon">⚠️</span>
+            <div class="error-text">
+                <span class="error-title"></span>
+                <span class="error-details"></span>
+            </div>
+            <button class="close-error" onclick="hideError()">×</button>
+        </div>
+    </div>
     
     <div class="drop-zone" id="dropZone">
-        <p>Drop files here</p>
-        <input type="file" id="fileInput" multiple style="display: none;">
+        <p>Drop .md files here</p>
+        <input type="file" id="fileInput" accept=".md" multiple style="display: none;">
         <button onclick="document.getElementById('fileInput').click()">Select Files</button>
     </div>
 
@@ -24,6 +37,78 @@ title: Document Upload
         padding: 2rem;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .error-message {
+        background-color: #fff3f3;
+        border: 1px solid #ffcdd2;
+        border-radius: 4px;
+        padding: 1rem;
+        margin: 1rem 0;
+        animation: fadeIn 0.3s ease-in-out;
+        position: relative;
+    }
+    
+    .error-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .error-icon {
+        font-size: 1.5rem;
+    }
+    
+    .error-text {
+        flex: 1;
+    }
+    
+    .error-title {
+        display: block;
+        color: #d32f2f;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .error-details {
+        display: block;
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    .close-error {
+        background: none;
+        border: none;
+        color: #d32f2f;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        line-height: 1;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .upload-info {
+        color: #666;
+        font-size: 0.9em;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+    }
+    
+    .file-type-info {
+        color: #666;
+        font-size: 0.9em;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #e3f2fd;
+        border-radius: 4px;
+        border-left: 4px solid var(--accent-color);
     }
     
     .drop-zone {
@@ -51,6 +136,10 @@ title: Document Upload
         align-items: center;
         padding: 1rem;
         border-bottom: 1px solid #eee;
+        background-color: white;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .file-item:last-child {
@@ -60,6 +149,9 @@ title: Document Upload
     .status {
         color: #666;
         font-size: 0.9em;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
     }
     
     .success {
@@ -68,6 +160,13 @@ title: Document Upload
     
     .error {
         color: #f44336;
+    }
+
+    .file-details {
+        display: block;
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 0.25rem;
     }
     
     button {
@@ -89,6 +188,7 @@ title: Document Upload
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const fileList = document.getElementById('fileList');
+    const errorMessage = document.getElementById('errorMessage');
 
     // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -122,14 +222,39 @@ title: Document Upload
         dropZone.classList.remove('dragover');
     }
 
+    function isMarkdownFile(file) {
+        return file.name.toLowerCase().endsWith('.md');
+    }
+
+    function showError(title, details) {
+        errorMessage.style.display = 'block';
+        errorMessage.querySelector('.error-title').textContent = title;
+        errorMessage.querySelector('.error-details').textContent = details;
+    }
+
+    function hideError() {
+        errorMessage.style.display = 'none';
+    }
+
     function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
-        handleFiles({ target: { files: files } });
+        const validFiles = Array.from(files).filter(isMarkdownFile);
+        
+        if (validFiles.length === 0) {
+            showError('Invalid File Type', 'Please drop only .md files');
+            return;
+        }
+        
+        handleFiles({ target: { files: validFiles } });
     }
 
     function handleFiles(e) {
-        const files = [...e.target.files];
+        const files = [...e.target.files].filter(isMarkdownFile);
+        if (files.length === 0) {
+            showError('Invalid File Type', 'Please select only .md files');
+            return;
+        }
         files.forEach(uploadFile);
     }
 
@@ -157,15 +282,34 @@ title: Document Upload
             if (data.success) {
                 status.textContent = 'Uploaded successfully';
                 status.classList.add('success');
+                if (data.details) {
+                    const details = document.createElement('span');
+                    details.className = 'file-details';
+                    details.textContent = `Saved to: ${data.details.path}`;
+                    status.appendChild(details);
+                }
+                hideError(); // Hide error message on success
             } else {
-                status.textContent = 'Upload failed';
+                status.textContent = data.error;
                 status.classList.add('error');
+                if (data.details) {
+                    const details = document.createElement('span');
+                    details.className = 'file-details';
+                    details.textContent = data.details;
+                    status.appendChild(details);
+                }
+                showError(data.error, data.details);
             }
         })
         .catch(error => {
             const status = fileItem.querySelector('.status');
-            status.textContent = 'Upload failed';
+            status.textContent = 'Network Error';
             status.classList.add('error');
+            const details = document.createElement('span');
+            details.className = 'file-details';
+            details.textContent = `Failed to connect to server: ${error.message}`;
+            status.appendChild(details);
+            showError('Network Error', `Failed to connect to server: ${error.message}`);
             console.error('Error:', error);
         });
     }
