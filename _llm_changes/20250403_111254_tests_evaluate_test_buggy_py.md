@@ -1,3 +1,12 @@
+---
+layout: llm_change # Using the same layout, but could create a specific one
+title: "Generated Tests for buggy.py"
+date: 2025-04-03T11:12:54.056934
+file: "tests/evaluate/test_buggy.py" # Report is about the test file
+change_type: "Test Generation"
+source_file: "evaluate/buggy.py"
+---
+```python
 import pytest
 from evaluate.buggy import add_numbers, subtract_numbers, multiply_numbers, divide_numbers, concatenate_strings, list_index_error
 
@@ -42,3 +51,4 @@ def test_list_index_error():
     # The list_index_error function should raise an IndexError due to accessing an out-of-range index.
     with pytest.raises(IndexError):
         list_index_error()
+```
