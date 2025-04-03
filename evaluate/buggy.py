@@ -9,6 +9,14 @@ def subtract_numbers(x, y):
     """Return the difference between x and y."""
     return x - y
 
+def subtract_numbers(x, y):
+    """Return the difference between x and y."""
+    return x - y
+
+def subtract_numbers(x, y):
+    """Return the difference between x and y."""
+    return x - y
+
 
 def multiply_numbers(x, y):
     """Return the product of x and y."""
