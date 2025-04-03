@@ -1,3 +1,12 @@
+---
+layout: llm_change
+title: "Generated Tests for buggy.py"
+date: 2025-04-03T11:51:39.731229
+file: "tests/evaluate/test_buggy.py"
+change_type: "Test Generation"
+source_file: "evaluate/buggy.py"
+---
+```python
 import pytest
 from evaluate.buggy import (
     add_numbers,
@@ -67,3 +76,4 @@ def test_list_index_error():
     result = list_index_error()
     # Given the implementation, the expected element is 1 (from [1, 2, 3])
     assert result == 1
+```
