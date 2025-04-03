@@ -6,6 +6,7 @@ title: Document Upload
 <div class="upload-container">
     <h1>Document Upload</h1>
     <p>Drag and drop your documents here or click to select files</p>
+    <p class="upload-info">Files will be saved to: converter_markdown/input_folder_markdown</p>
     
     <div class="drop-zone" id="dropZone">
         <p>Drop files here</p>
@@ -24,6 +25,15 @@ title: Document Upload
         padding: 2rem;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .upload-info {
+        color: #666;
+        font-size: 0.9em;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
     }
     
     .drop-zone {
@@ -155,10 +165,10 @@ title: Document Upload
         .then(data => {
             const status = fileItem.querySelector('.status');
             if (data.success) {
-                status.textContent = 'Uploaded successfully';
+                status.textContent = data.message || 'Uploaded successfully';
                 status.classList.add('success');
             } else {
-                status.textContent = 'Upload failed';
+                status.textContent = data.error || 'Upload failed';
                 status.classList.add('error');
             }
         })

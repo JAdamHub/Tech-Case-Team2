@@ -7,7 +7,7 @@ app = Flask(__name__,
             template_folder='_layouts')
 
 # Configure upload folder
-UPLOAD_FOLDER = 'converter_markdown/input_folder'
+UPLOAD_FOLDER = 'converter_markdown/input_folder_markdown'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
