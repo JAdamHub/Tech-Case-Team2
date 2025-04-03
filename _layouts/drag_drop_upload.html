@@ -6,7 +6,7 @@ title: Document Upload
 <div class="upload-container">
     <h1>Document Upload</h1>
     <p>Drag and drop your markdown (.md) files here or click to select files</p>
-    <p class="upload-info">Files will be saved to: converter_markdown/input_folder_markdown</p>
+    <p class="upload-info">Files will be uploaded to your GitHub repository</p>
     <p class="file-type-info">Only .md files are allowed</p>
     
     <div class="error-message" id="errorMessage" style="display: none;">
@@ -258,10 +258,7 @@ title: Document Upload
         files.forEach(uploadFile);
     }
 
-    function uploadFile(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-
+    async function uploadFile(file) {
         // Create file item in the list
         const fileItem = document.createElement('div');
         fileItem.className = 'file-item';
@@ -271,28 +268,52 @@ title: Document Upload
         `;
         fileList.appendChild(fileItem);
 
-        // Send file to server
-        fetch('/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            // Read file content
+            const content = await file.text();
+            
+            // Get GitHub token from environment variable or prompt
+            const token = await getGitHubToken();
+            if (!token) {
+                throw new Error('GitHub token is required');
+            }
+
+            // Get repository info from URL
+            const repoInfo = getRepoInfo();
+            if (!repoInfo) {
+                throw new Error('Could not determine repository information');
+            }
+
+            // Create or update file using GitHub API
+            const response = await fetch(`https://api.github.com/repos/${repoInfo.owner}/${repoInfo.repo}/contents/converter_markdown/input_folder_markdown/${file.name}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: `Add ${file.name}`,
+                    content: btoa(unescape(encodeURIComponent(content))),
+                    branch: 'main'
+                })
+            });
+
+            const data = await response.json();
+
             const status = fileItem.querySelector('.status');
-            if (data.success) {
+            if (response.ok) {
                 status.textContent = 'Uploaded successfully';
                 status.classList.add('success');
-                if (data.details) {
+                if (data.content) {
                     const details = document.createElement('span');
                     details.className = 'file-details';
-                    details.textContent = `Saved to: ${data.details.path}`;
+                    details.textContent = `Saved to: ${data.content.path}`;
                     status.appendChild(details);
                 }
-                hideError(); // Hide error message on success
+                hideError();
             } else {
-                // Show the specific error message from the server
-                const errorMessage = data.error || 'Upload failed';
-                const errorDetails = data.details || 'An unknown error occurred';
+                const errorMessage = data.message || 'Upload failed';
+                const errorDetails = data.documentation_url ? `See ${data.documentation_url} for more information` : 'An unknown error occurred';
                 
                 status.textContent = errorMessage;
                 status.classList.add('error');
@@ -304,17 +325,44 @@ title: Document Upload
                 
                 showError(errorMessage, errorDetails);
             }
-        })
-        .catch(error => {
+        } catch (error) {
             const status = fileItem.querySelector('.status');
-            status.textContent = 'Network Error';
+            status.textContent = 'Upload Error';
             status.classList.add('error');
             const details = document.createElement('span');
             details.className = 'file-details';
-            details.textContent = `Failed to connect to server: ${error.message}`;
+            details.textContent = error.message;
             status.appendChild(details);
-            showError('Network Error', `Failed to connect to server: ${error.message}`);
+            showError('Upload Error', error.message);
             console.error('Error:', error);
-        });
+        }
+    }
+
+    function getRepoInfo() {
+        // Get repository info from current URL
+        const url = window.location.href;
+        const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+        if (match) {
+            return {
+                owner: match[1],
+                repo: match[2]
+            };
+        }
+        return null;
+    }
+
+    async function getGitHubToken() {
+        // Try to get token from localStorage first
+        let token = localStorage.getItem('github_token');
+        
+        if (!token) {
+            // Prompt user for token
+            token = prompt('Please enter your GitHub Personal Access Token:');
+            if (token) {
+                localStorage.setItem('github_token', token);
+            }
+        }
+        
+        return token;
     }
 </script> 
