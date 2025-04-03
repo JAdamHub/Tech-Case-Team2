@@ -102,6 +102,11 @@ def process_markdown_files(input_folder, output_folder):
             base_name = os.path.splitext(os.path.basename(input_file))[0]
             output_file = os.path.join(output_folder, f"{base_name}.html")
             
+            # Skip if HTML file already exists
+            if os.path.exists(output_file):
+                print(f"\nSkipping {input_file} - HTML file already exists")
+                continue
+                
             print(f"\nProcessing: {input_file}")
             print(f"Output will be saved to: {output_file}")
             
