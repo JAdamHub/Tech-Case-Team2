@@ -169,6 +169,7 @@ def save_change_report(file_path, diff_content, change_type):
     """Save the diff report as a markdown file for Jekyll"""
     if not os.path.exists(LLM_CHANGES_DIR):
         os.makedirs(LLM_CHANGES_DIR)
+        print(f"Created directory: {LLM_CHANGES_DIR}")
         
     timestamp = datetime.now()
     report_filename_base = file_path.replace('/', '_').replace('.', '_')
@@ -191,6 +192,11 @@ change_type: "{change_type}"
             f.write(front_matter)
             f.write(diff_content)
         print(f"Saved change report: {report_path}")
+        # Debug: verificer at filen faktisk blev oprettet
+        if os.path.exists(report_path):
+            print(f"DEBUG: Verified report file exists at {report_path}, size: {os.path.getsize(report_path)} bytes")
+        else:
+            print(f"DEBUG: PROBLEM! Report file was not created at {report_path}!")
     except Exception as e:
         print(f"Error saving change report {report_path}: {e}")
 

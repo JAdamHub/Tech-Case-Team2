@@ -192,6 +192,7 @@ def save_creation_report(original_file_path, test_file_path, test_content):
     """Save a report about the created test file for Jekyll"""
     if not os.path.exists(LLM_CHANGES_DIR):
         os.makedirs(LLM_CHANGES_DIR)
+        print(f"Created directory: {LLM_CHANGES_DIR}")
         
     timestamp = datetime.now()
     # Sanitize file_path for the report filename
@@ -220,6 +221,11 @@ source_file: "{original_file_path}"
             f.write(front_matter)
             f.write(report_content)
         print(f"Saved test creation report: {report_path}")
+        # Debug: verificer at filen faktisk blev oprettet
+        if os.path.exists(report_path):
+            print(f"DEBUG: Verified report file exists at {report_path}, size: {os.path.getsize(report_path)} bytes")
+        else:
+            print(f"DEBUG: PROBLEM! Report file was not created at {report_path}!")
     except Exception as e:
         print(f"Error saving test creation report {report_path}: {e}")
 
