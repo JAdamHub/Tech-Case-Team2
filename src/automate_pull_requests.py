@@ -10,36 +10,51 @@ import subprocess
 FILES_TO_PROCESS_PATH = "files_to_process.txt"
 
 def get_changed_evaluate_files():
-    """Get the list of changed/new Python files in the evaluate directory compared to the base branch."""
+    """Get the list of changed/new Python files in the evaluate directory.
+    Compares HEAD~1..HEAD if on main branch, otherwise compares against base branch.
+    """
     try:
-        # Determine the base branch: Use GITHUB_BASE_REF if available (from PR event), otherwise default to origin/main
-        base_ref = os.getenv('GITHUB_BASE_REF')
-        if base_ref:
-            base_branch = f'origin/{base_ref}'
-            print(f"Using base branch from GITHUB_BASE_REF: {base_branch}")
-            # Fetch the specific base branch to ensure it exists locally
-            try:
-                subprocess.run(['git', 'fetch', 'origin', base_ref], check=True, capture_output=True)
-                print(f"Fetched base branch {base_ref} from origin.")
-            except subprocess.CalledProcessError as fetch_error:
-                print(f"Warning: Failed to fetch specific base branch '{base_ref}': {fetch_error}. Falling back to fetching all.")
-                # Fallback to fetching everything if specific fetch fails
-                subprocess.run(['git', 'fetch', 'origin'], check=True, capture_output=True)
-        else:
-            base_branch = 'origin/main'
-            print(f"GITHUB_BASE_REF not set. Defaulting base branch to: {base_branch}")
-            # Ensure origin/main is up-to-date
-            try:
-                subprocess.run(['git', 'fetch', 'origin', 'main'], check=True, capture_output=True)
-                print("Fetched main branch from origin.")
-            except subprocess.CalledProcessError as fetch_error:
-                print(f"Warning: Failed to fetch main branch: {fetch_error}. The diff might be inaccurate.")
+        ref_name = os.getenv('GITHUB_REF_NAME')
+        event_name = os.getenv('GITHUB_EVENT_NAME')
+        print(f"Detected ref: {ref_name}, event: {event_name}")
 
-        # Define the git diff command
-        diff_command = ['git', 'diff', '--name-only', '--diff-filter=ARM', base_branch, '--', 'evaluate/**/*.py']
+        comparison_target = ""
+        diff_command_base = ['git', 'diff', '--name-only', '--diff-filter=ARM']
+
+        if ref_name == 'main' and event_name == 'push':
+            # Compare the last two commits on main after a push
+            # Ensure fetch depth is sufficient in the workflow (fetch-depth: 2 or 0)
+            print("Running on main branch after push. Comparing HEAD~1 to HEAD.")
+            comparison_target = ['HEAD~1', 'HEAD']
+            # No explicit fetch needed here as checkout action should handle fetch-depth
+        else:
+            # Default behavior: Compare against base branch (for PRs or manual runs)
+            base_ref = os.getenv('GITHUB_BASE_REF') # Typically set on pull_request events
+            if base_ref:
+                base_branch = f'origin/{base_ref}'
+                print(f"Using base branch from GITHUB_BASE_REF: {base_branch}")
+                try:
+                    subprocess.run(['git', 'fetch', 'origin', base_ref], check=True, capture_output=True, text=True)
+                    print(f"Fetched base branch {base_ref} from origin.")
+                except subprocess.CalledProcessError as fetch_error:
+                    print(f"Warning: Failed to fetch specific base branch '{base_ref}': {fetch_error.stderr}. Falling back to fetching all.")
+                    subprocess.run(['git', 'fetch', 'origin'], check=True, capture_output=True, text=True)
+            else:
+                base_branch = 'origin/main'
+                print(f"GITHUB_BASE_REF not set. Defaulting base branch to: {base_branch}")
+                try:
+                    # Ensure origin/main is up-to-date
+                    subprocess.run(['git', 'fetch', 'origin', 'main'], check=True, capture_output=True, text=True)
+                    print("Fetched main branch from origin.")
+                except subprocess.CalledProcessError as fetch_error:
+                    print(f"Warning: Failed to fetch main branch: {fetch_error.stderr}. The diff might be inaccurate.")
+            comparison_target = [base_branch]
+
+        # Construct the full diff command
+        diff_command = diff_command_base + comparison_target + ['--', 'evaluate/**/*.py']
         print(f"Running git diff command: {' '.join(diff_command)}")
 
-        # Get the diff limited to Python files in the evaluate directory and its subdirectories
+        # Execute the diff command
         result = subprocess.run(
             diff_command, 
             capture_output=True, 
@@ -47,20 +62,25 @@ def get_changed_evaluate_files():
             check=True # Check for errors
         )
         
-        print(f"Git diff output:\n{result.stdout.strip()}") # Log the raw output for debugging
+        print(f"Git diff output:\n{result.stdout.strip()}")
 
         files = result.stdout.strip().split('\n')
-        # Filter out empty strings if any
         changed_files = [f for f in files if f and os.path.exists(f)] 
         
         if not changed_files:
-            print(f"No changed Python files detected in the evaluate directory compared to {base_branch}.")
+            print(f"No changed Python files detected in evaluate/ based on the comparison.")
         else:
             print(f"Detected changed Python files in evaluate/: {', '.join(changed_files)}")
             
         return changed_files
+        
     except subprocess.CalledProcessError as e:
-        print(f"Warning: git diff command failed: {e}. Output: {e.stderr}")
+        # Handle cases like insufficient fetch depth for HEAD~1 or other git errors
+        print(f"Warning: git diff command failed: {e}")
+        print(f"Command stderr: {e.stderr}")
+        if "unknown revision or path not in the working tree" in e.stderr and 'HEAD~1' in diff_command:
+             print("This might be due to insufficient fetch depth in your Git checkout.")
+             print("Ensure your workflow's checkout step uses 'fetch-depth: 2' or 'fetch-depth: 0'.")
         print(f"Assuming no changed files due to diff error.")
         return []
     except Exception as e:
@@ -80,22 +100,35 @@ def save_files_to_process(file_list):
         print(f"Error saving file list to {FILES_TO_PROCESS_PATH}: {e}")
 
 def get_diff_for_files(file_list):
-    """Get the combined git diff for a specific list of files against the base branch."""
+    """Get the combined git diff for a specific list of files.
+    Compares HEAD~1..HEAD if on main branch, otherwise compares against base branch.
+    """
     if not file_list:
         return None
     try:
-        # Determine the base branch similarly to get_changed_evaluate_files
-        base_ref = os.getenv('GITHUB_BASE_REF')
-        base_branch = f'origin/{base_ref}' if base_ref else 'origin/main'
-        print(f"Generating specific file diff against base: {base_branch}")
+        ref_name = os.getenv('GITHUB_REF_NAME')
+        event_name = os.getenv('GITHUB_EVENT_NAME')
+        comparison_target = ""
+        
+        if ref_name == 'main' and event_name == 'push':
+            print("Generating specific file diff using HEAD~1..HEAD for main branch push.")
+            comparison_target = ['HEAD~1', 'HEAD']
+        else:
+            base_ref = os.getenv('GITHUB_BASE_REF')
+            base_branch = f'origin/{base_ref}' if base_ref else 'origin/main'
+            print(f"Generating specific file diff against base: {base_branch}")
+            comparison_target = [base_branch]
 
-        # Create the command list, including the file paths at the end
-        command = ['git', 'diff', base_branch, '--'] + file_list
+        # Create the command list
+        command = ['git', 'diff'] + comparison_target + ['--'] + file_list
         print(f"Running git diff command: {' '.join(command)}")
         result = subprocess.run(command, capture_output=True, text=True, check=True)
         return result.stdout
     except subprocess.CalledProcessError as e:
-         print(f"Warning: git diff failed for specific files: {e}. Output: {e.stderr}. Cannot generate specific diff.")
+         print(f"Warning: git diff failed for specific files: {e}. Output: {e.stderr}")
+         if "unknown revision or path not in the working tree" in e.stderr and 'HEAD~1' in command:
+             print("This might be due to insufficient fetch depth.")
+         print("Cannot generate specific diff.")
          return None
     except Exception as e:
         print(f"Error getting git diff for specific files: {e}")
