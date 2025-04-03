@@ -4,9 +4,12 @@ import re
 import openai
 from dotenv import load_dotenv
 import subprocess
+from datetime import datetime
 
 # Define the path for the file list
 FILES_TO_PROCESS_PATH = "files_to_process.txt"
+# Define the LLM changes directory consistent with other scripts
+LLM_CHANGES_DIR = "_llm_changes"
 
 def get_files_to_process():
     """Reads the list of files to process from the specified file."""
@@ -130,6 +133,68 @@ def get_ai_suggestions(file_content, bugs):
         print(f"Error getting AI suggestions: {e}")
         return "Could not generate AI suggestions."
 
+def save_bug_report(file_path, bugs, suggestions):
+    """Save bug detection and fix suggestions to a markdown file in the _llm_changes directory"""
+    try:
+        # Create the directory if it doesn't exist
+        os.makedirs(LLM_CHANGES_DIR, exist_ok=True)
+        
+        # Skip saving if no bugs found or no suggestions generated
+        if not bugs:
+            return False
+            
+        # Create a filename based on the original file path
+        file_name = os.path.basename(file_path)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        file_key = file_path.replace('/', '_').replace('.', '_')
+        report_file = os.path.join(LLM_CHANGES_DIR, f"{timestamp}_{file_key}_bugs.md")
+        
+        # Format the report with Jekyll front matter
+        title = f"Bug Fix Suggestions for {file_name}"
+        front_matter = f"""---
+layout: llm_change
+title: "{title}"
+date: {datetime.now().isoformat()}
+file: "{file_path}"
+change_type: "Bug Fix Suggestions"
+consolidated: true
+---
+"""
+        
+        # Format the bugs info
+        bugs_md = "## Detected Issues\n\n"
+        for i, bug in enumerate(bugs, 1):
+            bugs_md += f"### Issue {i}: {bug['type']}\n"
+            if 'line' in bug:
+                bugs_md += f"- Line: {bug['line']}\n"
+            if 'suggestion' in bug:
+                bugs_md += f"- Suggestion: {bug['suggestion']}\n"
+            if 'imports' in bug:
+                bugs_md += f"- Unused imports: {', '.join(bug['imports'])}\n"
+            bugs_md += "\n"
+            
+        # Format the AI suggestions
+        ai_md = f"""
+## AI-Generated Fix Suggestions
+
+```
+{suggestions}
+```
+"""
+        
+        # Combine all content
+        formatted_report = f"{front_matter}\n{bugs_md}\n{ai_md}"
+        
+        # Write the report to the file
+        with open(report_file, 'w') as f:
+            f.write(formatted_report)
+            
+        print(f"Saved bug report to {report_file}")
+        return True
+    except Exception as e:
+        print(f"Error saving bug report for {file_path}: {e}")
+        return False
+
 def suggest_bug_fixes():
     """Analyze code changes and suggest bug fixes for files in files_to_process.txt"""
     print('Analyzing code changes and suggesting bug fixes...')
@@ -157,6 +222,9 @@ def suggest_bug_fixes():
                 suggestions = get_ai_suggestions(content, bugs)
                 print("\nAI-suggested fixes:")
                 print(suggestions)
+                
+                # Save the bug report to a file
+                save_bug_report(file_path, bugs, suggestions)
             else:
                 print("Could not get AI suggestions because file content could not be read.")
         elif content: # Only print "No bugs" if we actually analyzed the file

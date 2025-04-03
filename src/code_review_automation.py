@@ -7,6 +7,8 @@ from datetime import datetime
 
 # Define the path for the file list
 FILES_TO_PROCESS_PATH = "files_to_process.txt"
+# Define the LLM changes directory consistent with other scripts
+LLM_CHANGES_DIR = "_llm_changes"
 
 def get_files_to_process():
     """Reads the list of files to process from the specified file."""
@@ -85,37 +87,53 @@ def review_code_with_ai(file_path, content):
 
 
 def save_review_to_file(file_path, review_comments, content):
-    """Save review comments to a Python file in the changes/reviews directory"""
+    """Save review comments to a Python file in the _llm_changes directory"""
     try:
         # Create the reviews directory if it doesn't exist
-        reviews_dir = os.path.normpath('changes/reviews')
-        os.makedirs(reviews_dir, exist_ok=True)
+        # Changed to use the standard LLM_CHANGES_DIR
+        os.makedirs(LLM_CHANGES_DIR, exist_ok=True)
         
         # Create a filename based on the original file path
         file_name = os.path.basename(file_path)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        review_file = os.path.join(reviews_dir, f"{timestamp}_{file_name}")
+        # Replace the path separators with underscore to make a valid filename
+        file_key = file_path.replace('/', '_').replace('.', '_')
+        report_filename_base = f"{timestamp}_{file_key}"
+        report_filename = f"{timestamp.strftime('%Y%m%d_%H%M%S')}_{report_filename_base}.md"
         
-        # Format the review as a Python file with comments
-        formatted_review = f'''# Review for: {file_path}
-# Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+        # Format the review with Jekyll front matter for consistency with other reports
+        title = f"Code Review for {file_name}"
+        front_matter = f"""---
+layout: llm_change
+title: "{title}"
+date: {datetime.now().isoformat()}
+file: "{file_path}"
+change_type: "Code Review"
+consolidated: true
+---
+"""
+        
+        # Format the review as markdown with code blocks
+        formatted_review = f"""{front_matter}
+## Review for: {file_path}
+Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-# Review Comments:
-[
+### Review Comments:
+```python
 {review_comments}
-]
+```
 
-# Original code:
-[
+### Original code:
+```python
 {content}
-]
-'''
+```
+"""
         
         # Write the review to the file
-        with open(review_file, 'w') as f:
+        with open(report_filename, 'w') as f:
             f.write(formatted_review)
             
-        print(f"Saved review to {review_file}")
+        print(f"Saved review to {report_filename}")
         return True
     except Exception as e:
         print(f"Error saving review for {file_path}: {e}")
