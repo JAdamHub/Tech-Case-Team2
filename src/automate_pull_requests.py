@@ -13,9 +13,9 @@ def get_changed_evaluate_files():
     """Get the list of changed/new Python files in the evaluate directory compared to main."""
     try:
         # Get the diff limited to Python files in the evaluate directory and its subdirectories
-        # Use --diff-filter=AM to only get Added or Modified files
+        # Use --diff-filter=ARM to get Added, Renamed, or Modified files
         result = subprocess.run(
-            ['git', 'diff', '--name-only', '--diff-filter=AM', 'origin/main', '--', 'evaluate/**/*.py'], 
+            ['git', 'diff', '--name-only', '--diff-filter=ARM', 'origin/main', '--', 'evaluate/**/*.py'], 
             capture_output=True, 
             text=True,
             check=True # Check for errors
