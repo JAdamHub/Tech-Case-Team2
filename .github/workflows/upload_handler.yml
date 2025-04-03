@@ -3,18 +3,23 @@ name: Handle File Uploads
 on:
   pull_request:
     types: [opened]
-    paths:
-      - 'converter_markdown/input_folder_markdown/**'
 
 jobs:
   process-upload:
-    if: contains(github.event.pull_request.title, '[GH-PAGES-UPLOAD]') && contains(github.event.pull_request.body, '<!-- GH-PAGES-UPLOAD -->')
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     
     steps:
+      - name: Debug PR Info
+        run: |
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+          echo "PR Body: ${{ github.event.pull_request.body }}"
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "PR Head Ref: ${{ github.head_ref }}"
+          echo "PR Base Ref: ${{ github.base_ref }}"
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -35,6 +40,10 @@ jobs:
         run: |
           # Create input directory if it doesn't exist
           mkdir -p converter_markdown/input_folder_markdown
+          
+          # List all files in the repository
+          echo "Current directory structure:"
+          find . -type f
           
           # Move any .md files to the input directory
           find . -name "*.md" -not -path "./converter_markdown/input_folder_markdown/*" -exec mv {} converter_markdown/input_folder_markdown/ \;
