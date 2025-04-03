@@ -7,17 +7,17 @@ layout: default
     <h1 class="change-title">{{ page.title }}</h1>
     <div class="change-meta">
       <div class="meta-item">
-        <span class="meta-label">Fil:</span>
+        <span class="meta-label">File:</span>
         <code class="meta-value">{{ page.file }}</code>
       </div>
       {% if page.source_file %}
       <div class="meta-item">
-        <span class="meta-label">Kildekode:</span>
+        <span class="meta-label">Source code:</span>
         <code class="meta-value">{{ page.source_file }}</code>
       </div>
       {% endif %}
       <div class="meta-item">
-        <span class="meta-label">Dato:</span>
+        <span class="meta-label">Date:</span>
         <span class="meta-value">{{ page.date | date: "%d-%m-%Y %H:%M" }}</span>
       </div>
       <div class="meta-item">
@@ -28,7 +28,7 @@ layout: default
   </div>
 
   <div class="change-content">
-    <h2>Ændringer</h2>
+    <h2>Changes</h2>
     
     <div class="code-diff">
       {{ content }}

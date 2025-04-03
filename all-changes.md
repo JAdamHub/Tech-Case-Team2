@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Alle LLM-ændringer
+title: All LLM Changes
 permalink: /all-changes/
 ---
 
-# Alle LLM-ændringer
+# All LLM Changes
 
 <div class="filters">
-  <button class="filter-btn active" data-filter="all">Alle</button>
+  <button class="filter-btn active" data-filter="all">All</button>
   <button class="filter-btn" data-filter="linting">Linting</button>
   <button class="filter-btn" data-filter="test-generation">Tests</button>
   <button class="filter-btn" data-filter="bug-fix">Bug Fixes</button>

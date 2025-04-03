@@ -5,7 +5,7 @@ title: LLM Code Automation Hub
 
 # LLM Code Automation Hub
 
-Velkommen til LLM Code Automation Hub - et centralt sted hvor du kan følge alle AI-genererede kodeændringer, test og forbedringer i projektet.
+Welcome to LLM Code Automation Hub - a central place where you can follow all AI-generated code changes, tests, and improvements in the project.
 
 ## Dashboard
 
@@ -21,7 +21,7 @@ Velkommen til LLM Code Automation Hub - et centralt sted hvor du kan følge alle
         </li>
       {% endfor %}
       {% if linting_changes.size > 5 %}
-        <li><a href="{{ '/changes/linting/' | relative_url }}">Se alle</a></li>
+        <li><a href="{{ '/changes/linting/' | relative_url }}">See all</a></li>
       {% endif %}
     </ul>
   </div>
@@ -37,7 +37,7 @@ Velkommen til LLM Code Automation Hub - et centralt sted hvor du kan følge alle
         </li>
       {% endfor %}
       {% if test_changes.size > 5 %}
-        <li><a href="{{ '/changes/tests/' | relative_url }}">Se alle</a></li>
+        <li><a href="{{ '/changes/tests/' | relative_url }}">See all</a></li>
       {% endif %}
     </ul>
   </div>
@@ -53,7 +53,7 @@ Velkommen til LLM Code Automation Hub - et centralt sted hvor du kan følge alle
         </li>
       {% endfor %}
       {% if bug_changes.size > 5 %}
-        <li><a href="{{ '/changes/bugs/' | relative_url }}">Se alle</a></li>
+        <li><a href="{{ '/changes/bugs/' | relative_url }}">See all</a></li>
       {% endif %}
     </ul>
   </div>
@@ -69,13 +69,13 @@ Velkommen til LLM Code Automation Hub - et centralt sted hvor du kan følge alle
         </li>
       {% endfor %}
       {% if review_changes.size > 5 %}
-        <li><a href="{{ '/changes/reviews/' | relative_url }}">Se alle</a></li>
+        <li><a href="{{ '/changes/reviews/' | relative_url }}">See all</a></li>
       {% endif %}
     </ul>
   </div>
 </div>
 
-## Seneste ændringer
+## Recent Changes
 
 <ul class="recent-changes">
   {% for change in site.llm_changes reversed limit:10 %}
@@ -88,5 +88,5 @@ Velkommen til LLM Code Automation Hub - et centralt sted hvor du kan følge alle
 </ul>
 
 <div class="view-all">
-  <a href="{{ '/all-changes' | relative_url }}" class="button">Se alle ændringer</a>
+  <a href="{{ '/all-changes' | relative_url }}" class="button">View all changes</a>
 </div> 
