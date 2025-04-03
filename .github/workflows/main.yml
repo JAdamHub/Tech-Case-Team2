@@ -52,6 +52,12 @@ jobs:
       - name: Run Code Review Automation
         run: python src/code_review_automation.py
 
+      # --- Consolidate Reports ---
+      - name: Create Summary Index for Reports
+        run: |
+          mkdir -p utils
+          python utils/consolidate_reports.py
+
       # --- Commit potential changes made by scripts (lint fixes, generated tests) ---
       - name: Commit LLM Changes
         run: |

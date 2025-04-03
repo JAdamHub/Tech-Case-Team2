@@ -6,11 +6,18 @@ from dotenv import load_dotenv
 from github import Github
 
 def get_git_diff():
-    """Get the git diff of the current branch compared to main"""
+    """Get the git diff of the current branch compared to main for Python files in the evaluate folder"""
     try:
         import subprocess
-        # Get the diff
-        result = subprocess.run(['git', 'diff', 'origin/main'], capture_output=True, text=True)
+        # Get the diff limited to Python files in the evaluate directory and its subdirectories
+        result = subprocess.run(['git', 'diff', 'origin/main', '--', 'evaluate/**/*.py'], capture_output=True, text=True)
+        
+        # Check if we got any diff results
+        if not result.stdout.strip():
+            print("No changes detected in Python files under the evaluate directory.")
+        else:
+            print(f"Found changes in Python files under the evaluate directory.")
+            
         return result.stdout
     except Exception as e:
         print(f"Error getting git diff: {e}")

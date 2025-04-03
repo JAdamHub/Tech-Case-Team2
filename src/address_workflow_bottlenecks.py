@@ -9,8 +9,14 @@ from dotenv import load_dotenv
 import tempfile
 import difflib # Though not used for diff here, keep for consistency if needed later
 from datetime import datetime # Added for timestamping
+import ast
+import inspect
+import importlib.util
 
 LLM_CHANGES_DIR = "_llm_changes" # Consistent directory name
+
+# Dictionary to track the latest report for each file
+file_report_map = {}
 
 def get_project_files():
     """Get all Python files in the evaluate directory, excluding test files"""
@@ -189,18 +195,33 @@ def save_test_file(test_file_info):
         return None
 
 def save_creation_report(original_file_path, test_file_path, test_content):
-    """Save a report about the created test file for Jekyll"""
+    """Save a report about the created test file for Jekyll, consolidating reports for the same file"""
     if not os.path.exists(LLM_CHANGES_DIR):
         os.makedirs(LLM_CHANGES_DIR)
         print(f"Created directory: {LLM_CHANGES_DIR}")
-        
+    
+    # Use the original file as the key for consolidation
+    basename = os.path.basename(original_file_path)
+    original_file_key = original_file_path.replace('/', '_').replace('.', '_')
+    
+    # Check if we already have a report for this file
+    existing_reports = []
+    if os.path.exists(LLM_CHANGES_DIR):
+        for filename in os.listdir(LLM_CHANGES_DIR):
+            # Look for test reports for this original file
+            if (filename.endswith('.md') and 
+                original_file_key in filename and 
+                'test' in filename.lower() and 
+                not filename.startswith('action_run_marker')):
+                existing_reports.append(os.path.join(LLM_CHANGES_DIR, filename))
+    
     timestamp = datetime.now()
-    # Sanitize file_path for the report filename
+    # Use the test file path for the report name, but key off the original file
     report_filename_base = test_file_path.replace('/', '_').replace('.', '_')
     report_filename = f"{timestamp.strftime('%Y%m%d_%H%M%S')}_{report_filename_base}.md"
     report_path = os.path.join(LLM_CHANGES_DIR, report_filename)
     
-    title = f"Generated Tests for {os.path.basename(original_file_path)}"
+    title = f"Generated Tests for {basename}"
     
     # Jekyll Front Matter
     front_matter = f"""---
@@ -210,6 +231,7 @@ date: {timestamp.isoformat()}
 file: "{test_file_path}"
 change_type: "Test Generation"
 source_file: "{original_file_path}"
+consolidated: true
 ---
 """
     
@@ -220,19 +242,29 @@ source_file: "{original_file_path}"
         # Ensure the directory exists (in case it was deleted after first check)
         os.makedirs(LLM_CHANGES_DIR, exist_ok=True)
         
-        # Write the file - using 'with open' to ensure proper file handling
+        # Delete any existing reports for this file
+        for old_report in existing_reports:
+            try:
+                print(f"Removing older test report for {basename}: {old_report}")
+                os.remove(old_report)
+            except Exception as e:
+                print(f"Error removing old report {old_report}: {e}")
+        
+        # Write the new consolidated report
         with open(report_path, 'w') as f:
             f.write(front_matter)
             f.write(report_content)
             f.flush()  # Ensure data is written to disk
         
-        print(f"Saved test creation report: {report_path}")
+        print(f"Saved consolidated test creation report: {report_path}")
         
         # Debug: Verify the file was actually created
         if os.path.exists(report_path):
             print(f"DEBUG: Verified report file exists at {report_path}, size: {os.path.getsize(report_path)} bytes")
             # Update index file with category information
-            update_index_with_category(title, report_filename, "Test Generation", timestamp)
+            update_index_with_category(title, os.path.basename(report_filename), "Test Generation", timestamp)
+            # Store this as the latest report for this file
+            file_report_map[original_file_path] = report_path
         else:
             print(f"DEBUG: PROBLEM! Report file was not created at {report_path}!")
             
