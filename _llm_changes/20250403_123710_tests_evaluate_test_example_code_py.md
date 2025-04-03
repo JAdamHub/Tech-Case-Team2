@@ -1,3 +1,13 @@
+---
+layout: llm_change
+title: "Generated Tests for example_code.py"
+date: 2025-04-03T12:37:10.931118
+file: "tests/evaluate/test_example_code.py"
+change_type: "Test Generation"
+source_file: "evaluate/example_code.py"
+consolidated: true
+---
+```python
 import pytest
 from evaluate.example_code import add, subtract, multiply, divide, buggy_function, another_function, faulty_logic
 
@@ -91,3 +101,4 @@ def test_faulty_logic():
     result = faulty_logic(-2, -5)
     # Since -2 > -5 is True, it returns (-5 - (-2)) = -3
     assert result == -3
+```

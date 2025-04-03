@@ -38,19 +38,28 @@ jobs:
           pip install -r requirements.txt
 
       # --- Run LLM Tasks that Modify Code/Generate Reports ---
-      - name: Run Bug Fix Suggestions (Analysis Only)
+      - name: Automating Pull Request (automate_pull_requests.py.py)
+        run: python src/automate_pull_requests.py
+
+      - name: Run Bug Fix Suggestions (Analysis Only - bug_fix_suggestions.py)
         run: python src/bug_fix_suggestions.py
 
-      - name: Run Admin Tasks Automation (Linting Fixes & Report)
+      - name: Run Admin Tasks Automation (Linting Fixes & Report) (automate_admin_tasks.py)
         id: admin_tasks
         run: python src/automate_admin_tasks.py
 
-      - name: Run Workflow Bottleneck Mitigation (Test Generation & Report)
+      - name: Run Workflow Bottleneck Mitigation (Test Generation & Report) (address_workflow_bottlenecks.py)
         id: bottlenecks
         run: python src/address_workflow_bottlenecks.py
         
-      - name: Run Code Review Automation
+      - name: Run Code Review Automation (code_review_automation.py)
         run: python src/code_review_automation.py
+
+      # --- Consolidate Reports ---
+      - name: Create Summary Index for Reports
+        run: |
+          mkdir -p utils
+          python utils/consolidate_reports.py
 
       # --- Commit potential changes made by scripts (lint fixes, generated tests) ---
       - name: Commit LLM Changes

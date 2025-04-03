@@ -6,11 +6,18 @@ from dotenv import load_dotenv
 from github import Github
 
 def get_git_diff():
-    """Get the git diff of the current branch compared to main"""
+    """Get the git diff of the current branch compared to main for Python files in the evaluate folder"""
     try:
         import subprocess
-        # Get the diff
-        result = subprocess.run(['git', 'diff', 'origin/main'], capture_output=True, text=True)
+        # Get the diff limited to Python files in the evaluate directory and its subdirectories
+        result = subprocess.run(['git', 'diff', 'origin/main', '--', 'evaluate/**/*.py'], capture_output=True, text=True)
+        
+        # Check if we got any diff results
+        if not result.stdout.strip():
+            print("No changes detected in Python files under the evaluate directory.")
+        else:
+            print(f"Found changes in Python files under the evaluate directory.")
+            
         return result.stdout
     except Exception as e:
         print(f"Error getting git diff: {e}")
@@ -60,15 +67,6 @@ def create_pull_request():
         load_dotenv()
         # Get GitHub token from environment variables
         github_token = os.getenv("GITHUB_TOKEN")
-        if not github_token:
-            print("GITHUB_TOKEN environment variable not set.")
-            return
-        
-        # Get repository details
-        repo_name = os.getenv("GITHUB_REPOSITORY")
-        if not repo_name:
-            print("GITHUB_REPOSITORY environment variable not set.")
-            return
         
         # Get the git diff
         diff = get_git_diff()
@@ -81,6 +79,22 @@ def create_pull_request():
         
         # Extract PR title from the description (first line)
         pr_title = pr_description.split('\n')[0]
+        
+        # If no GitHub token is available, just print what would have been in the PR
+        if not github_token:
+            print("GITHUB_TOKEN environment variable not set.")
+            print("\nHere's the PR description that would be generated:")
+            print(f"Title: {pr_title}")
+            print("\nDescription:")
+            print(pr_description)
+            print("\nTo create an actual PR, set the GITHUB_TOKEN environment variable.")
+            return
+            
+        # Get repository details
+        repo_name = os.getenv("GITHUB_REPOSITORY")
+        if not repo_name:
+            print("GITHUB_REPOSITORY environment variable not set.")
+            return
         
         # Create GitHub instance
         g = Github(github_token)

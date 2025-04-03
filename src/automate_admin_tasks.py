@@ -7,8 +7,13 @@ from dotenv import load_dotenv
 import tempfile
 import difflib
 from datetime import datetime
+import pylint
+import json
 
 LLM_CHANGES_DIR = "_llm_changes"
+
+# Dictionary to track the latest report for each file
+file_report_map = {}
 
 def get_modified_python_files():
     """Get a list of modified Python files using git"""
@@ -166,17 +171,26 @@ def generate_diff(original_content, fixed_content):
     return ''.join(diff)
 
 def save_change_report(file_path, diff_content, change_type):
-    """Save the diff report as a markdown file for Jekyll"""
+    """Save the diff report as a markdown file for Jekyll, consolidating reports for the same file"""
     if not os.path.exists(LLM_CHANGES_DIR):
         os.makedirs(LLM_CHANGES_DIR)
         print(f"Created directory: {LLM_CHANGES_DIR}")
         
+    basename = os.path.basename(file_path)
+    file_key = file_path.replace('/', '_').replace('.', '_')
+    
+    # Check if we already have a report for this file
+    existing_reports = []
+    if os.path.exists(LLM_CHANGES_DIR):
+        for filename in os.listdir(LLM_CHANGES_DIR):
+            if filename.endswith('.md') and file_key in filename and not filename.startswith('action_run_marker'):
+                existing_reports.append(os.path.join(LLM_CHANGES_DIR, filename))
+    
     timestamp = datetime.now()
-    report_filename_base = file_path.replace('/', '_').replace('.', '_')
-    report_filename = f"{timestamp.strftime('%Y%m%d_%H%M%S')}_{report_filename_base}.md"
+    report_filename = f"{timestamp.strftime('%Y%m%d_%H%M%S')}_{file_key}.md"
     report_path = os.path.join(LLM_CHANGES_DIR, report_filename)
     
-    title = f"{change_type.capitalize()} Fixes for {os.path.basename(file_path)}"
+    title = f"{change_type.capitalize()} for {basename}"
     
     front_matter = f"""---
 layout: llm_change
@@ -184,6 +198,7 @@ title: "{title}"
 date: {timestamp.isoformat()}
 file: "{file_path}"
 change_type: "{change_type}"
+consolidated: true
 ---
 """
     
@@ -191,19 +206,29 @@ change_type: "{change_type}"
         # Ensure the directory exists (in case it was deleted after first check)
         os.makedirs(LLM_CHANGES_DIR, exist_ok=True)
         
-        # Write the file with proper error handling
+        # Delete any existing reports for this file
+        for old_report in existing_reports:
+            try:
+                print(f"Removing older report for {basename}: {old_report}")
+                os.remove(old_report)
+            except Exception as e:
+                print(f"Error removing old report {old_report}: {e}")
+        
+        # Write the new consolidated report
         with open(report_path, 'w') as f:
             f.write(front_matter)
             f.write(diff_content)
             f.flush()  # Ensure data is written to disk
             
-        print(f"Saved change report: {report_path}")
+        print(f"Saved consolidated change report: {report_path}")
         
         # Debug: Verify the file was actually created
         if os.path.exists(report_path):
             print(f"DEBUG: Verified report file exists at {report_path}, size: {os.path.getsize(report_path)} bytes")
             # Update index file with category information
             update_index_with_category(title, os.path.basename(report_filename), change_type, timestamp)
+            # Store this as the latest report for this file
+            file_report_map[file_path] = report_path
         else:
             print(f"DEBUG: PROBLEM! Report file was not created at {report_path}!")
             

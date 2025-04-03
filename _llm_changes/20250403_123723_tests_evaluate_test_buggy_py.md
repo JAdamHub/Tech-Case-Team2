@@ -1,3 +1,13 @@
+---
+layout: llm_change
+title: "Generated Tests for buggy.py"
+date: 2025-04-03T12:37:23.404811
+file: "tests/evaluate/test_buggy.py"
+change_type: "Test Generation"
+source_file: "evaluate/buggy.py"
+consolidated: true
+---
+```python
 import pytest
 from evaluate.buggy import (
     add_numbers,
@@ -77,3 +87,4 @@ def test_list_index_error():
     # The function should routinely return the first element (1) of the list.
     result = list_index_error()
     assert result == 1
+```
