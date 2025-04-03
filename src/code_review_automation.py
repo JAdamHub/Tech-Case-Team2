@@ -14,11 +14,22 @@ def get_modified_python_files():
             text=True
         )
         files = result.stdout.strip().split('\n')
-        return [f for f in files if f.endswith('.py')]
+        # Normalize paths and ensure they exist
+        normalized_files = []
+        for f in files:
+            if f.endswith('.py'):
+                # Normalize the path to handle different separators
+                normalized_path = os.path.normpath(f)
+                if os.path.exists(normalized_path):
+                    normalized_files.append(normalized_path)
+                else:
+                    print(f"Warning: File {normalized_path} does not exist, skipping")
+        return normalized_files
     except Exception as e:
         print(f"Error getting modified files: {e}")
         return []
     
+
 def get_locally_modified_files():
     """Get locally modified files for demonstration purposes"""
     try:
@@ -32,21 +43,25 @@ def get_locally_modified_files():
         
         files_with_diff = []
         for file_path in modified_files:
+            # Normalize the path
+            normalized_path = os.path.normpath(file_path)
+            
             # Skip non-existent or non-code files
-            if not os.path.exists(file_path) or not is_code_file(file_path):
+            if not os.path.exists(normalized_path) or not is_code_file(normalized_path):
+                print(f"Warning: Skipping {normalized_path} - file does not exist or is not a code file")
                 continue
                 
             # Get the diff for each file
             diff_result = subprocess.run(
-                ['git', 'diff', 'HEAD', '--', file_path],
+                ['git', 'diff', 'HEAD', '--', normalized_path],
                 capture_output=True,
                 text=True
             )
-            files_with_diff.append((file_path, diff_result.stdout))
+            files_with_diff.append((normalized_path, diff_result.stdout))
             
         # If no modified files found, use example_code.py for demonstration
         if not files_with_diff:
-            example_file = 'src/example_code.py'
+            example_file = os.path.normpath('src/example_code.py')
             if os.path.exists(example_file):
                 with open(example_file, 'r') as f:
                     content = f.read()
@@ -72,8 +87,11 @@ def review_code_with_ai(file_path, content):
             print("Error: OPENAI_API_KEY environment variable not set.")
             return "Could not generate review comments due to missing API key."
         
+        # Normalize the file path
+        normalized_path = os.path.normpath(file_path)
+        
         # Determine file type
-        file_ext = os.path.splitext(file_path)[1]
+        file_ext = os.path.splitext(normalized_path)[1]
         
         # Create a prompt based on file type
         prompt = f"""
@@ -100,7 +118,7 @@ def review_code_with_ai(file_path, content):
         - What the issue is
         - How to fix it
         
-        Here's the code:
+        Here's the code from {normalized_path}:
         ```{file_ext}
         {content[:4000]}  # Limit content size
         ```
