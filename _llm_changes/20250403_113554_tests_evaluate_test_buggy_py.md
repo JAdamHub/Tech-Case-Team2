@@ -1,3 +1,12 @@
+---
+layout: llm_change
+title: "Generated Tests for buggy.py"
+date: 2025-04-03T11:35:54.641708
+file: "tests/evaluate/test_buggy.py"
+change_type: "Test Generation"
+source_file: "evaluate/buggy.py"
+---
+```python
 import pytest
 from evaluate.buggy import (
     add_numbers,
@@ -57,3 +66,4 @@ def test_list_index_error():
     # We test that it does not raise any error and returns None.
     result = list_index_error()
     assert result is None
+```
