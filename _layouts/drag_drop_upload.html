@@ -5,29 +5,36 @@ title: Document Upload
 
 <div class="upload-container">
     <h1>Document Upload</h1>
-    <p>To upload markdown (.md) files, please use GitHub's web interface:</p>
     
     <div class="upload-info">
-        <p>Files should be uploaded to: <code>converter_markdown/input_folder_markdown/</code></p>
-        <p>Only .md files are allowed</p>
+        <h3>Upload Instructions</h3>
+        <ol class="steps">
+            <li>Click the button below to open GitHub's upload interface</li>
+            <li>Drag and drop your .md files or click to select them</li>
+            <li>Make sure files are uploaded to: <code>converter_markdown/input_folder_markdown/</code></li>
+            <li>Add a commit message (e.g., "Add markdown files")</li>
+            <li>Click "Commit changes"</li>
+        </ol>
     </div>
-    
+
     <div class="upload-buttons">
         <a href="https://github.com/{{ site.github_username }}/{{ site.github_repo }}/upload/main/converter_markdown/input_folder_markdown" 
            class="upload-button" 
-           target="_blank">
+           target="_blank"
+           rel="noopener noreferrer">
+            <span class="button-icon">📁</span>
             Upload Files on GitHub
         </a>
     </div>
 
-    <div class="instructions">
-        <h3>Instructions:</h3>
-        <ol>
-            <li>Click the "Upload Files on GitHub" button above</li>
-            <li>Drag and drop your .md files or click to select them</li>
-            <li>Add a commit message (e.g., "Add markdown files")</li>
-            <li>Click "Commit changes"</li>
-        </ol>
+    <div class="important-notes">
+        <h3>Important Notes:</h3>
+        <ul>
+            <li>Only .md (markdown) files are accepted</li>
+            <li>Files must be uploaded to the correct directory</li>
+            <li>You need to be logged into GitHub to upload files</li>
+            <li>The upload interface will open in a new tab</li>
+        </ul>
     </div>
 </div>
 
@@ -43,16 +50,34 @@ title: Document Upload
     
     .upload-info {
         background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 4px;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        border: 1px solid #e9ecef;
+    }
+    
+    .upload-info h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        font-size: 1.2rem;
+    }
+    
+    .steps {
+        padding-left: 1.5rem;
         margin: 1rem 0;
     }
     
-    .upload-info code {
+    .steps li {
+        margin-bottom: 0.75rem;
+        line-height: 1.5;
+    }
+    
+    .steps code {
         background-color: #e9ecef;
         padding: 0.2rem 0.4rem;
         border-radius: 3px;
         font-family: monospace;
+        color: #2c3e50;
     }
     
     .upload-buttons {
@@ -61,38 +86,62 @@ title: Document Upload
     }
     
     .upload-button {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
         background-color: var(--accent-color);
         color: white;
         padding: 1rem 2rem;
-        border-radius: 4px;
+        border-radius: 8px;
         text-decoration: none;
         font-size: 1.1rem;
-        transition: background-color 0.2s;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .upload-button:hover {
         background-color: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         text-decoration: none;
     }
     
-    .instructions {
-        background-color: #e3f2fd;
-        padding: 1rem;
-        border-radius: 4px;
-        margin-top: 2rem;
+    .button-icon {
+        font-size: 1.2rem;
     }
     
-    .instructions h3 {
+    .important-notes {
+        background-color: #e3f2fd;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 2rem;
+        border: 1px solid #bbdefb;
+    }
+    
+    .important-notes h3 {
         margin-top: 0;
         color: #1976d2;
+        font-size: 1.2rem;
     }
     
-    .instructions ol {
+    .important-notes ul {
         padding-left: 1.5rem;
+        margin: 1rem 0;
     }
     
-    .instructions li {
+    .important-notes li {
         margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+    
+    @media (max-width: 600px) {
+        .upload-container {
+            padding: 1rem;
+        }
+        
+        .upload-button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
     }
 </style> 
