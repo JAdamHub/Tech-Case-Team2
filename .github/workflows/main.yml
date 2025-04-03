@@ -57,15 +57,32 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          
+          # Debug: List what was generated
+          echo "Checking for generated files:"
+          ls -la _llm_changes/ || echo "_llm_changes directory not found or empty"
+          
+          # Make sure _llm_changes directory exists
+          mkdir -p _llm_changes
+          
+          # Touch a file to ensure the directory is not empty
+          echo "LLM Changes from GitHub Action run at $(date)" > _llm_changes/action_run_marker.md
+          
           # Add generated reports and any modified/created files (tests, fixed source)
-          git add _llm_changes/
+          git add -f _llm_changes/
           git add tests/
           git add src/
+          
+          # Debug: Check git status
+          echo "Git status:"
+          git status
+          
           # Check if there are changes to commit
           if git diff --staged --quiet; then
             echo "No LLM changes to commit."
           else
             git commit -m "chore: Apply LLM fixes and generated tests/reports"
+            # Force push to ensure changes are applied
             git push origin HEAD:${{ github.head_ref || github.ref_name }} || echo "Push failed, maybe no changes or protected branch."
           fi
         # Continue even if commit/push fails (e.g., no changes, protected branch)

@@ -217,17 +217,31 @@ source_file: "{original_file_path}"
     report_content = f"```python\n{test_content}\n```"
     
     try:
+        # Ensure the directory exists (in case it was deleted after first check)
+        os.makedirs(LLM_CHANGES_DIR, exist_ok=True)
+        
+        # Write the file - using 'with open' to ensure proper file handling
         with open(report_path, 'w') as f:
             f.write(front_matter)
             f.write(report_content)
+            f.flush()  # Ensure data is written to disk
+        
         print(f"Saved test creation report: {report_path}")
-        # Debug: verificer at filen faktisk blev oprettet
+        
+        # Debug: Verify the file was actually created
         if os.path.exists(report_path):
             print(f"DEBUG: Verified report file exists at {report_path}, size: {os.path.getsize(report_path)} bytes")
+            # Create an index file to help with navigation
+            index_path = os.path.join(LLM_CHANGES_DIR, "index.md")
+            with open(index_path, 'a') as idx:
+                idx.write(f"- [{title}](./{os.path.basename(report_path)})\n")
         else:
             print(f"DEBUG: PROBLEM! Report file was not created at {report_path}!")
+            
     except Exception as e:
         print(f"Error saving test creation report {report_path}: {e}")
+        import traceback
+        traceback.print_exc()  # Print detailed stack trace
 
 def run_tests(test_path):
     """Run pytest tests for a specific file or directory"""
