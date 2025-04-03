@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title }} | {{ site.title }}</title>
+  <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}">
+  {% if page.custom_css %}
+    {% for css_file in page.custom_css %}
+      <link rel="stylesheet" href="{{ css_file | relative_url }}">
+    {% endfor %}
+  {% endif %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-content">
+      <a href="{{ site.baseurl }}/" class="site-title">
+        <span class="title-prefix">AI</span>
+        <span class="title-main">Code Hub</span>
+      </a>
+      <nav class="site-nav">
+        <ul>
+          <li><a href="{{ site.baseurl }}/">Dashboard</a></li>
+          <li><a href="{{ site.baseurl }}/all-changes">Alle ændringer</a></li>
+          <li><a href="https://github.com/{{ site.github_username }}{{ site.baseurl }}" target="_blank">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  
+  <main class="site-content">
+    {{ content }}
+  </main>
+  
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p>{{ site.title }} &copy; {{ site.time | date: '%Y' }}</p>
+      <p>En automatiseret platform til sporing af AI-genererede kodeændringer</p>
+    </div>
+  </footer>
+
+  <style>
+    /* Header Styles */
+    .site-header {
+      background-color: var(--dark-bg);
+      padding: 1rem 0;
+      margin-bottom: 2rem;
+    }
+    
+    .site-header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    .site-title {
+      color: white;
+      text-decoration: none;
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+    
+    .title-prefix {
+      color: var(--accent-color);
+      margin-right: 0.25rem;
+    }
+    
+    .site-nav ul {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 1.5rem;
+    }
+    
+    .site-nav a {
+      color: var(--light-text);
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.2s;
+    }
+    
+    .site-nav a:hover {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+    
+    /* Footer Styles */
+    .site-footer {
+      background-color: var(--light-bg);
+      padding: 2rem 0;
+      margin-top: 4rem;
+      text-align: center;
+      border-top: 1px solid #ddd;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    .site-footer p {
+      margin: 0.5rem 0;
+      color: #6c757d;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .site-header-content {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .site-nav {
+        margin-top: 1rem;
+      }
+      
+      .site-nav ul {
+        justify-content: center;
+      }
+    }
+  </style>
+</body>
+</html> 

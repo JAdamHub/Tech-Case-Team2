@@ -1,12 +1,13 @@
 # Basic Jekyll configuration
-title: LLM Code Change Tracker
-description: Visualizing code modifications made by AI.
-baseurl: "/Tech-Case-Team2" # Set this to your repository name if deploying to user/org pages, or leave blank for project pages root
-url: "" # Set this to your GitHub Pages URL if needed (e.g., https://username.github.io)
+title: LLM Code Automation Hub
+description: AI-driven code improvements and testing
+baseurl: "/Tech-Case-Team2"
+url: "" 
+github_username: "hedegaard"
 
 # Build settings
 markdown: kramdown
-theme: minima # Using a standard theme for simplicity
+theme: minima
 plugins:
   - jekyll-feed
 
@@ -17,6 +18,33 @@ collections:
     permalink: /changes/:path/
     sort_by: date
     sort_direction: reverse
+
+# Custom collections for specific change types
+defaults:
+  - scope:
+      path: ""
+      type: "llm_changes"
+    values:
+      layout: "llm_change"
+
+# Category pages
+category_pages:
+  - title: "Linting Changes"
+    url: "/changes/linting/"
+    icon: "🔍"
+    type: "Linting"
+  - title: "Test Generation"
+    url: "/changes/tests/"
+    icon: "🧪"
+    type: "Test Generation" 
+  - title: "Bug Fixes"
+    url: "/changes/bugs/"
+    icon: "🐛"
+    type: "Bug Fix"
+  - title: "Code Reviews"
+    url: "/changes/reviews/"
+    icon: "📝"
+    type: "Code Review"
     
 # Ensure _llm_changes directory is included in the build
 include:

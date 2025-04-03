@@ -2,14 +2,114 @@
 layout: default
 ---
 
-# {{ page.title }}
+<div class="change-detail">
+  <div class="change-header">
+    <h1 class="change-title">{{ page.title }}</h1>
+    <div class="change-meta">
+      <div class="meta-item">
+        <span class="meta-label">Fil:</span>
+        <code class="meta-value">{{ page.file }}</code>
+      </div>
+      {% if page.source_file %}
+      <div class="meta-item">
+        <span class="meta-label">Kildekode:</span>
+        <code class="meta-value">{{ page.source_file }}</code>
+      </div>
+      {% endif %}
+      <div class="meta-item">
+        <span class="meta-label">Dato:</span>
+        <span class="meta-value">{{ page.date | date: "%d-%m-%Y %H:%M" }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Type:</span>
+        <span class="meta-value change-type change-type-{{ page.change_type | downcase | replace: ' ', '-' }}">{{ page.change_type }}</span>
+      </div>
+    </div>
+  </div>
 
-**File:** `{{ page.file }}`  
-**Date:** {{ page.date | date: "%Y-%m-%d %H:%M" }}  
-**Type:** {{ page.change_type }}
+  <div class="change-content">
+    <h2>Ændringer</h2>
+    
+    <div class="code-diff">
+      {{ content }}
+    </div>
+  </div>
+</div>
 
-## Changes Made
-
-```diff
-{{ content }}
-``` 
+<style>
+  .change-detail {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .change-title {
+    margin-top: 0;
+    color: var(--primary-color);
+  }
+  
+  .change-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  
+  .meta-item {
+    background: var(--light-bg);
+    padding: 0.75rem;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .meta-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+  }
+  
+  .meta-value {
+    font-weight: 500;
+  }
+  
+  .code-diff {
+    background: #f6f8fa;
+    border-radius: 6px;
+    border: 1px solid #e1e4e8;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  .code-diff pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  
+  .code-diff code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 14px;
+  }
+  
+  /* Syntax highlighting for diff */
+  .code-diff .diff-add, 
+  .code-diff .diff-remove {
+    display: block;
+    padding: 0 4px;
+    margin: 0 -4px;
+  }
+  
+  .code-diff .diff-add {
+    background-color: #e6ffec;
+    color: #24863d;
+  }
+  
+  .code-diff .diff-remove {
+    background-color: #ffebe9;
+    color: #cf222e;
+  }
+</style> 
