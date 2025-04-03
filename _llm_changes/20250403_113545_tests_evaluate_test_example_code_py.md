@@ -1,3 +1,12 @@
+---
+layout: llm_change
+title: "Generated Tests for example_code.py"
+date: 2025-04-03T11:35:45.389162
+file: "tests/evaluate/test_example_code.py"
+change_type: "Test Generation"
+source_file: "evaluate/example_code.py"
+---
+```python
 import pytest
 from evaluate.example_code import (
     add,
@@ -64,3 +73,4 @@ def test_faulty_logic():
     assert faulty_logic(10, 4) == 4 - 10  # Expected: -6
     # Testing equality case: since a is not greater than b, should follow a - b.
     assert faulty_logic(5, 5) == 0
+```
