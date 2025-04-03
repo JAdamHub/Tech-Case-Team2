@@ -1,6 +1,5 @@
 """Module for arithmetic and string operations with sample functions."""
 
-
 def add_numbers(x, y):
     """Return the sum of x and y."""
     return x + y
