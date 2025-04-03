@@ -95,11 +95,10 @@ def save_review_to_file(file_path, review_comments, content):
         
         # Create a filename based on the original file path
         file_name = os.path.basename(file_path)
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         # Replace the path separators with underscore to make a valid filename
         file_key = file_path.replace('/', '_').replace('.', '_')
-        report_filename_base = f"{timestamp}_{file_key}"
-        report_filename = f"{timestamp.strftime('%Y%m%d_%H%M%S')}_{report_filename_base}.md"
+        report_filename_base = f"{file_key}"
+        report_filename = f"code_review_{report_filename_base}.py"
         
         # Format the review with Jekyll front matter for consistency with other reports
         title = f"Code Review for {file_name}"
