@@ -6,14 +6,6 @@ permalink: /all-changes/
 
 # All LLM Changes
 
-<div class="filters">
-  <button class="filter-btn active" data-filter="all">All</button>
-  <button class="filter-btn" data-filter="linting">Linting</button>
-  <button class="filter-btn" data-filter="test-generation">Tests</button>
-  <button class="filter-btn" data-filter="bug-fix">Bug Fixes</button>
-  <button class="filter-btn" data-filter="code-review">Code Reviews</button>
-</div>
-
 <div class="changes-list">
   {% assign all_changes = site.llm_changes | sort: 'date' | reverse %}
   {% for change in all_changes %}
@@ -26,69 +18,14 @@ permalink: /all-changes/
         <a href="{{ change.url | relative_url }}">{{ change.title }}</a>
       </h3>
       <div class="change-meta">
-        <span class="change-file">{{ change.file }}</span>
-        {% if change.source_file %}
-        <span class="change-source">Source: {{ change.source_file }}</span>
-        {% endif %}
+        <span class="change-file">Consolidated Report</span>
+        <span class="change-date">Generated: {{ change.date | date: "%d-%m-%Y %H:%M" }}</span>
       </div>
     </div>
   {% endfor %}
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const filterButtons = document.querySelectorAll('.filter-btn');
-  const changeItems = document.querySelectorAll('.change-item');
-  
-  filterButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const filter = button.getAttribute('data-filter');
-      
-      // Update active button
-      filterButtons.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-      
-      // Filter items
-      changeItems.forEach(item => {
-        if (filter === 'all' || item.getAttribute('data-type') === filter) {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  });
-});
-</script>
-
 <style>
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-}
-
-.filter-btn {
-  padding: 0.5rem 1rem;
-  background: var(--light-bg);
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.filter-btn.active {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-
-.filter-btn:hover:not(.active) {
-  background: #e9ecef;
-}
-
 .changes-list {
   display: grid;
   grid-template-columns: 1fr;
@@ -126,15 +63,29 @@ document.addEventListener('DOMContentLoaded', () => {
   gap: 1rem;
 }
 
-.change-file, .change-source {
+.change-file,
+.change-date {
   background: #e9ecef;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
 }
 
-@media (max-width: 768px) {
-  .filters {
-    justify-content: center;
-  }
+.change-type {
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background-color: #d3d3d3; /* Default background */
+    color: #333;
 }
+
+/* Keep specific styles if needed, e.g., for 'Combined Analysis' */
+.change-type-combined-analysis {
+    background-color: #007bff; /* Blue for combined */
+    color: white;
+}
+
+@media (max-width: 768px) {
+  /* Add any responsive adjustments if necessary */
+}
+
 </style> 

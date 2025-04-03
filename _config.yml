@@ -27,25 +27,6 @@ defaults:
     values:
       layout: "llm_change"
 
-# Category pages
-category_pages:
-  - title: "Linting Changes"
-    url: "/changes/linting/"
-    icon: "🔍"
-    type: "Linting"
-  - title: "Test Generation"
-    url: "/changes/tests/"
-    icon: "🧪"
-    type: "Test Generation" 
-  - title: "Bug Fixes"
-    url: "/changes/bugs/"
-    icon: "🐛"
-    type: "Bug Fix"
-  - title: "Code Reviews"
-    url: "/changes/reviews/"
-    icon: "📝"
-    type: "Code Review"
-    
 # Ensure _llm_changes directory is included in the build
 include:
   - _llm_changes 
